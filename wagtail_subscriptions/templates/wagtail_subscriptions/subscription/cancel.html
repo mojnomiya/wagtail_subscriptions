@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Cancel Subscription" %}{% endblock %}
+
+{% block content %}
+<div class="cancel-page">
+    <h1>{% trans "Cancel Subscription" %}</h1>
+    <p>{% trans "Are you sure you want to cancel your subscription?" %}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Yes, Cancel" %}</button>
+        <a href="{% url 'wagtail_subscriptions:customer_portal' %}" class="btn">{% trans "Keep Subscription" %}</a>
+    </form>
+</div>
+{% endblock %}

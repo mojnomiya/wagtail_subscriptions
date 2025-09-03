@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Upgrade Plan" %}{% endblock %}
+
+{% block content %}
+<div class="upgrade-page">
+    <h1>{% trans "Upgrade Your Plan" %}</h1>
+    
+    <div class="current-plan">
+        <h3>{% trans "Current Plan" %}: {{ current_subscription.plan.name }}</h3>
+        <p>${{ current_subscription.plan.price }}/{{ current_subscription.plan.get_billing_period_display|lower }}</p>
+    </div>
+    
+    <div class="available-plans">
+        <h3>{% trans "Available Plans" %}</h3>
+        {% for plan in available_plans %}
+        <div class="plan-option">
+            <h4>{{ plan.name }}</h4>
+            <p>${{ plan.price }}/{{ plan.get_billing_period_display|lower }}</p>
+            <a href="{% url 'wagtail_subscriptions:subscribe' plan.slug %}" class="btn">{% trans "Upgrade" %}</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

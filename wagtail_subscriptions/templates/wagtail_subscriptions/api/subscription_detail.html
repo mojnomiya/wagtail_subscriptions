@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Subscription Details" %}{% endblock %}
+
+{% block content %}
+<div class="subscription-details">
+    <h1>{% trans "Subscription Details" %}</h1>
+    
+    <div class="details">
+        <p><strong>{% trans "Plan" %}:</strong> {{ subscription.plan.name }}</p>
+        <p><strong>{% trans "Status" %}:</strong> {{ subscription.get_status_display }}</p>
+        <p><strong>{% trans "Price" %}:</strong> ${{ subscription.plan.price }}/{{ subscription.plan.get_billing_period_display|lower }}</p>
+        <p><strong>{% trans "Current Period" %}:</strong> {{ subscription.current_period_start|date:"M j, Y" }} - {{ subscription.current_period_end|date:"M j, Y" }}</p>
+        {% if subscription.trial_end %}
+        <p><strong>{% trans "Trial Ends" %}:</strong> {{ subscription.trial_end|date:"M j, Y" }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

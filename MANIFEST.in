@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include wagtail_subscriptions/templates *
+recursive-include wagtail_subscriptions/static *
+recursive-include wagtail_subscriptions/migrations *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

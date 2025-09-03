@@ -1,0 +1,83 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+
+{% block titletag %}{% trans "Customers" %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <a href="{% url 'wagtailadmin_home' %}">{% trans 'Home' %}</a>
+    <span>{% trans 'Subscriptions' %}</span>
+    <span>{% trans 'Customers' %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+{% include "wagtailadmin/shared/header.html" with title="Customers" icon="group" %}
+
+<div class="nice-padding" style="padding-left: 50px; padding-right: 50px;">
+    {% if customers %}
+    <table class="listing">
+        <thead>
+            <tr>
+                <th>{% trans "User" %}</th>
+                <th>{% trans "Email" %}</th>
+                <th>{% trans "Company" %}</th>
+                <th>{% trans "Subscription" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Joined" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td><strong>{{ customer.user.get_full_name|default:customer.user.username }}</strong></td>
+                <td>{{ customer.billing_email|default:customer.user.email }}</td>
+                <td>{{ customer.company_name|default:"-" }}</td>
+                <td>
+                    {% with customer.user.subscriptions.first as subscription %}
+                    {% if subscription %}
+                        {{ subscription.plan.name }}
+                    {% else %}
+                        <em>{% trans "No subscription" %}</em>
+                    {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with customer.user.subscriptions.first as subscription %}
+                    {% if subscription %}
+                        <span class="status-tag status-{{ subscription.status }}">{{ subscription.get_status_display }}</span>
+                    {% else %}
+                        <span class="status-tag inactive">{% trans "No subscription" %}</span>
+                    {% endif %}
+                    {% endwith %}
+                </td>
+                <td>{{ customer.created_at|date:"M j, Y" }}</td>
+                <td>
+                    <a href="/admin/auth/user/{{ customer.user.id }}/" class="button button-small">{% trans "View User" %}</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="help-block">
+        <h2>{% trans "No customers yet" %}</h2>
+        <p>{% trans "Customers will appear here when they sign up for subscriptions." %}</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.status-active { background: #d4edda; color: #155724; }
+.status-trialing { background: #cce7ff; color: #004085; }
+.status-canceled { background: #f8d7da; color: #721c24; }
+.status-tag.inactive { background: #e2e3e5; color: #6c757d; }
+</style>
+{% endblock %}

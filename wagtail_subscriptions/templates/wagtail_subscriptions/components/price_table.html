@@ -1,0 +1,97 @@
+{% load i18n subscription_tags %}
+
+<div class="px-4 py-16 mx-auto max-w-7xl">
+    <div class="text-center">
+        <h2 class="text-4xl font-bold text-gray-900 sm:text-5xl">{% trans "Choose Your Plan" %}</h2>
+        <p class="mt-4 text-xl text-gray-600">{% trans "Select the perfect plan for your needs" %}</p>
+    </div>
+    
+    <div class="mt-16 grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+        {% for plan in plans %}
+        <div class="relative bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 {% if highlight_plan == plan.slug %}ring-2 ring-blue-500{% endif %}">
+            {% if highlight_plan == plan.slug %}
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
+            </div>
+            {% elif forloop.counter0 == 1 and not highlight_plan %}
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
+            </div>
+            {% endif %}
+            
+            <div class="p-8">
+                <h3 class="text-2xl font-bold text-gray-900">{{ plan.name }}</h3>
+                
+                <div class="mt-4 flex items-baseline">
+                    <span class="text-5xl font-bold text-gray-900">${{ plan.price }}</span>
+                    <span class="ml-1 text-xl text-gray-500">/{{ plan.get_billing_period_display|lower }}</span>
+                </div>
+                
+                {% if plan.description %}
+                <p class="mt-4 text-gray-600">{{ plan.description }}</p>
+                {% endif %}
+                
+                {% if show_trial and plan.trial_period_days > 0 %}
+                <div class="mt-4 flex items-center text-green-600">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium">{% blocktrans with days=plan.trial_period_days %}{{ days }} day free trial{% endblocktrans %}</span>
+                </div>
+                {% endif %}
+                
+                <div class="mt-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">{% trans "What's included" %}:</h4>
+                    <ul class="space-y-3">
+                        {% plan_features plan as features %}
+                        {% for plan_feature in features %}
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">
+                                {{ plan_feature.feature.name }}
+                                {% if plan_feature.feature.feature_type == 'quota' and plan_feature.effective_quota %}
+                                    ({{ plan_feature.effective_quota }} {{ plan_feature.feature.quota_unit }})
+                                {% endif %}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-gray-700">{% trans "All basic features included" %}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <div class="mt-8">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'wagtail_subscriptions:subscribe' plan.slug %}" 
+                           class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-block text-center">
+                            {% if show_trial and plan.trial_period_days > 0 %}
+                                {% trans "Start Free Trial" %}
+                            {% else %}
+                                {% trans "Get Started" %}
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        <a href="/accounts/signup/" 
+                           class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-block text-center">
+                            {% trans "Sign Up" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <div class="text-gray-400 text-6xl mb-4">📋</div>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">{% trans "No Plans Available" %}</h3>
+            <p class="text-gray-600">{% trans "Subscription plans will appear here once they're created." %}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>

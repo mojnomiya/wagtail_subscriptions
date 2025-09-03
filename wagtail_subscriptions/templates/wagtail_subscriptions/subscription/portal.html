@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Customer Portal" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">{% trans "Subscription Management" %}</h1>
+            <p class="text-gray-600 mt-2">{% trans "Manage your subscription and billing information" %}</p>
+        </div>
+        
+        {% if subscription %}
+        <div class="grid gap-6 lg:grid-cols-2">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">{% trans "Current Subscription" %}</h2>
+                    <span class="px-3 py-1 text-sm font-medium rounded-full 
+                        {% if subscription.status == 'active' %}bg-green-100 text-green-800
+                        {% elif subscription.status == 'trialing' %}bg-blue-100 text-blue-800
+                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ subscription.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{% trans "Plan" %}</span>
+                        <span class="font-medium">{{ subscription.plan.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{% trans "Price" %}</span>
+                        <span class="font-medium">${{ subscription.plan.price }}/{{ subscription.plan.get_billing_period_display|lower }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{% trans "Current Period" %}</span>
+                        <span class="font-medium">{{ subscription.current_period_start|date:"M j" }} - {{ subscription.current_period_end|date:"M j, Y" }}</span>
+                    </div>
+                    
+                    {% if subscription.trial_end %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">{% trans "Trial Ends" %}</span>
+                        <span class="font-medium text-blue-600">{{ subscription.trial_end|date:"M j, Y" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Quick Actions" %}</h2>
+                <div class="space-y-3">
+                    <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
+                            <span class="font-medium">{% trans "Update Payment Method" %}</span>
+                        </div>
+                    </button>
+                    
+                    <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="font-medium">{% trans "Download Invoice" %}</span>
+                        </div>
+                    </button>
+                    
+                    <button class="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span class="font-medium">{% trans "Cancel Subscription" %}</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <div class="text-center py-16">
+            <div class="max-w-md mx-auto">
+                <svg class="w-16 h-16 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                </svg>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">{% trans "No Active Subscription" %}</h2>
+                <p class="text-gray-600 mb-8">{% trans "You don't have an active subscription. Choose a plan to get started." %}</p>
+                <a href="{% url 'wagtail_subscriptions:pricing' %}" 
+                   class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-8 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
+                    {% trans "View Plans" %}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load i18n %}
+
+<div class="subscription-status">
+    {% if subscription %}
+        <div class="subscription-active">
+            <span class="plan-name">{{ subscription.plan.name }}</span>
+            <span class="status status-{{ subscription.status }}">{{ subscription.get_status_display }}</span>
+            {% if subscription.is_trial %}
+                <span class="trial-info">{% trans "Trial ends" %}: {{ subscription.trial_end|date:"M j" }}</span>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="subscription-inactive">
+            <a href="{% url 'wagtail_subscriptions:pricing' %}" class="btn btn-primary">
+                {% trans "Choose Plan" %}
+            </a>
+        </div>
+    {% endif %}
+</div>

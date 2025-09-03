@@ -1,0 +1,337 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+
+{% block titletag %}{% trans "Subscription Settings" %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb">
+    <a href="{% url 'wagtailadmin_home' %}">{% trans 'Home' %}</a>
+    <span>{% trans 'Subscriptions' %}</span>
+    <span>{% trans 'Settings' %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+{% include "wagtailadmin/shared/header.html" with title="Subscription Settings" icon="cog" description="Configure payment processors and system settings" %}
+
+<div class="nice-padding" style="padding-left: 50px; padding-right: 50px;">
+    <div class="row">
+        <div class="col8">
+            <div class="panel">
+                <h2 class="panel-title">{% trans "Payment Processors Status" %}</h2>
+                <div class="panel-content">
+                    {% if payment_processors %}
+                    <div class="processor-grid">
+                        {% for provider, config in payment_processors.items %}
+                        <div class="processor-card {{ provider }}">
+                            <div class="processor-header">
+                                <div class="processor-logo">
+                                    {% if provider == 'stripe' %}💳
+                                    {% elif provider == 'paddle' %}🎣
+                                    {% elif provider == 'paypal' %}💰
+                                    {% endif %}
+                                </div>
+                                <div class="processor-info">
+                                    <h3>{{ provider|title }}</h3>
+                                    {% if config %}
+                                        <span class="status-badge configured">✓ {% trans "Configured" %}</span>
+                                    {% else %}
+                                        <span class="status-badge not-configured">⚠ {% trans "Not Configured" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if config %}
+                            <div class="processor-details">
+                                {% if provider == 'stripe' and config.public_key %}
+                                    <div class="config-item">
+                                        <label>{% trans "Public Key" %}</label>
+                                        <code>{{ config.public_key|truncatechars:25 }}...</code>
+                                    </div>
+                                {% elif provider == 'paddle' and config.vendor_id %}
+                                    <div class="config-item">
+                                        <label>{% trans "Vendor ID" %}</label>
+                                        <code>{{ config.vendor_id }}</code>
+                                    </div>
+                                {% elif provider == 'paypal' and config.client_id %}
+                                    <div class="config-item">
+                                        <label>{% trans "Client ID" %}</label>
+                                        <code>{{ config.client_id|truncatechars:25 }}...</code>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🔧</div>
+                        <h3>{% trans "No Payment Processors Configured" %}</h3>
+                        <p>{% trans "Configure payment processors in your Django settings to start accepting payments." %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="panel" style="margin-top: 20px;">
+                <h2 class="panel-title">{% trans "Configuration Generator" %}</h2>
+                <div class="panel-content">
+                    <form method="post" class="config-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label>{% trans "Select Payment Processor" %}</label>
+                            {{ config_form.processor }}
+                        </div>
+                        
+                        <div class="processor-fields stripe-fields">
+                            <h4>{% trans "Stripe Configuration" %}</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>{% trans "Public Key" %}</label>
+                                    {{ config_form.stripe_public_key }}
+                                </div>
+                                <div class="form-group">
+                                    <label>{% trans "Secret Key" %}</label>
+                                    {{ config_form.stripe_secret_key }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>{% trans "Webhook Secret" %}</label>
+                                {{ config_form.stripe_webhook_secret }}
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="button bicolor">{% trans "Generate Configuration" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col4">
+            <div class="panel">
+                <h2 class="panel-title">{% trans "Setup Guides" %}</h2>
+                <div class="panel-content">
+                    <div class="setup-guide">
+                        <h4>💳 {% trans "Stripe Setup" %}</h4>
+                        <ol>
+                            <li>{% trans "Create account at" %} <a href="https://stripe.com" target="_blank">stripe.com</a></li>
+                            <li>{% trans "Get API keys from dashboard" %}</li>
+                            <li>{% trans "Add webhook:" %} <code>/subscriptions/webhooks/stripe/</code></li>
+                            <li>{% trans "Update Django settings" %}</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="setup-guide">
+                        <h4>🎣 {% trans "Paddle Setup" %}</h4>
+                        <ol>
+                            <li>{% trans "Create account at" %} <a href="https://paddle.com" target="_blank">paddle.com</a></li>
+                            <li>{% trans "Get Vendor ID and Auth Code" %}</li>
+                            <li>{% trans "Configure webhook URL" %}</li>
+                            <li>{% trans "Update Django settings" %}</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="setup-guide">
+                        <h4>💰 {% trans "PayPal Setup" %}</h4>
+                        <ol>
+                            <li>{% trans "Create developer account" %}</li>
+                            <li>{% trans "Create application" %}</li>
+                            <li>{% trans "Get Client ID and Secret" %}</li>
+                            <li>{% trans "Update Django settings" %}</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.panel-title {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.panel-content {
+    padding: 20px;
+}
+
+.processor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.processor-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s ease;
+}
+
+.processor-card.stripe { border-left: 4px solid #635bff; }
+.processor-card.paddle { border-left: 4px solid #ff6b35; }
+.processor-card.paypal { border-left: 4px solid #0070ba; }
+
+.processor-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.processor-logo {
+    font-size: 2em;
+    margin-right: 16px;
+}
+
+.processor-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.status-badge.configured {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.not-configured {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.processor-details {
+    margin-top: 16px;
+}
+
+.config-item {
+    margin-bottom: 12px;
+}
+
+.config-item label {
+    display: block;
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.config-item code {
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #495057;
+}
+
+.config-form .form-group {
+    margin-bottom: 20px;
+}
+
+.config-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.config-form .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.processor-fields {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007cba;
+}
+
+.processor-fields h4 {
+    margin: 0 0 16px 0;
+    color: #333;
+}
+
+.setup-guide {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.setup-guide:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.setup-guide h4 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 1em;
+}
+
+.setup-guide ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.setup-guide li {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.setup-guide code {
+    background: #f1f3f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-icon {
+    font-size: 3em;
+    margin-bottom: 16px;
+}
+
+.help-text {
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}

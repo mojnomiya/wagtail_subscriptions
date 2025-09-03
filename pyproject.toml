@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wagtail-subscriptions"
+version = "1.0.0"
+description = "A comprehensive subscription management system for Wagtail CMS"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Wagtail",
+    "Framework :: Wagtail :: 4",
+    "Framework :: Wagtail :: 5",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "Django>=3.2,<5.0",
+    "wagtail>=4.0,<6.0",
+    "python-dateutil>=2.8.0",
+    "stripe>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/wagtail-subscriptions"
+Documentation = "https://wagtail-subscriptions.readthedocs.io/"
+Repository = "https://github.com/yourusername/wagtail-subscriptions"
+"Bug Tracker" = "https://github.com/yourusername/wagtail-subscriptions/issues"
+
+[tool.setuptools.packages.find]
+include = ["wagtail_subscriptions*"]
+
+[tool.setuptools.package-data]
+wagtail_subscriptions = [
+    "templates/**/*",
+    "static/**/*",
+    "migrations/**/*",
+]

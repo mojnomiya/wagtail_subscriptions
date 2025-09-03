@@ -1,0 +1,9 @@
+-r requirements.txt
+pytest>=6.0
+pytest-django>=4.0
+black>=22.0
+flake8>=4.0
+coverage>=6.0
+stripe>=5.0
+paddle-python-sdk>=1.0
+paypalrestsdk>=1.13
