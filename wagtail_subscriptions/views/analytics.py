@@ -3,26 +3,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from ..analytics import SubscriptionAnalytics
-from ..models import Subscription, SubscriptionPlan
-
-
-@method_decorator(staff_member_required, name='dispatch')
-class AnalyticsDashboardView(TemplateView):
-    """Analytics dashboard for subscription metrics"""
-    template_name = 'wagtail_subscriptions/admin/analytics.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        context.update({
-            'mrr': SubscriptionAnalytics.get_mrr(),
-            'churn_rate': SubscriptionAnalytics.get_churn_rate(),
-            'conversion_rate': SubscriptionAnalytics.get_conversion_rate(),
-            'total_subscriptions': Subscription.objects.filter(status__in=['active', 'trialing']).count(),
-            'total_plans': SubscriptionPlan.objects.filter(is_active=True).count(),
-        })
-        
-        return context
 
 
 @method_decorator(staff_member_required, name='dispatch')

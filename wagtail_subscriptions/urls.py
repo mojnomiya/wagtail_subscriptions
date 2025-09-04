@@ -10,9 +10,6 @@ urlpatterns = [
     path('subscribe/<slug:plan_slug>/', views.SubscribeView.as_view(), name='subscribe'),
     path('portal/', views.CustomerPortalView.as_view(), name='customer_portal'),
     
-    # Admin URLs
-    path('analytics/', views.AnalyticsDashboardView.as_view(), name='analytics_dashboard'),
-    
     # Webhook URLs
     path('webhooks/', include([
         path('stripe/', views.StripeWebhookView.as_view(), name='stripe_webhook'),
