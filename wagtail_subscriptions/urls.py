@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from .views.api import PricingPlansAPIView
 
 app_name = 'wagtail_subscriptions'
 
@@ -21,5 +22,6 @@ urlpatterns = [
     path('api/', include([
         path('subscription/', views.SubscriptionAPIView.as_view(), name='subscription_api'),
         path('analytics/', views.AnalyticsAPIView.as_view(), name='analytics_api'),
+        path('plans/', PricingPlansAPIView.as_view(), name='api_plans'),
     ])),
 ]

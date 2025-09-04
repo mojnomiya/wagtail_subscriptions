@@ -9,6 +9,7 @@ A comprehensive subscription management system for Wagtail CMS that provides eve
 - Feature-based access control
 - Trial periods and plan upgrades
 - Customer portal and billing management
+- **Multi-tenant support** (auto-detects django-tenant-schemas)
 
 💳 **Payment Integration**
 - Stripe integration (built-in)
@@ -21,6 +22,7 @@ A comprehensive subscription management system for Wagtail CMS that provides eve
 - Plan and feature management
 - Customer overview and analytics
 - Payment processor configuration
+- **Tenant-aware permissions** (works in both single/multi-tenant modes)
 
 🎨 **Frontend Components**
 - Responsive pricing tables
@@ -114,9 +116,17 @@ def analytics_view(request):
 ### Check Permissions in Templates
 
 ```django
-{% if request.user.subscriptions.first.has_feature_access:'api_access' %}
+{% load subscription_tags %}
+
+<!-- Works in both single-tenant and multi-tenant modes -->
+{% if request|has_feature:'api_access' %}
     <a href="/api/">API Documentation</a>
 {% endif %}
+
+<!-- Get subscription info -->
+{% subscription_info as sub_info %}
+<p>Current Plan: {{ sub_info.plan }}</p>
+<p>Subscriber: {{ sub_info.name }} ({{ sub_info.type }})</p>
 ```
 
 ## Documentation
@@ -171,6 +181,9 @@ python manage.py setup_subscription_permissions
 
 # Create sample data
 python manage.py create_sample_plans
+
+# Sync tenant plans (for multi-tenant setups)
+python manage.py sync_tenant_plans
 ```
 
 ## API Reference
@@ -201,6 +214,7 @@ from wagtail_subscriptions.permissions.mixins import (
     FeatureRequiredMixin
 )
 
+# Works automatically in both single-tenant and multi-tenant modes
 class MyView(FeatureRequiredMixin, TemplateView):
     required_feature = 'advanced_analytics'
     template_name = 'my_template.html'

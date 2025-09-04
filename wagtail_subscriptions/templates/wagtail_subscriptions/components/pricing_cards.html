@@ -1,0 +1,328 @@
+{% load i18n subscription_tags %}
+
+<div class="pricing-cards-container">
+    <div class="pricing-grid" id="pricing-grid">
+        <!-- Cards will be loaded here via JavaScript -->
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading pricing plans...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadPricingPlans();
+});
+
+async function loadPricingPlans() {
+    try {
+        const response = await fetch('/subscriptions/api/plans/');
+        const data = await response.json();
+        
+        if (data.success) {
+            renderPricingCards(data.plans);
+        } else {
+            showError('Failed to load pricing plans');
+        }
+    } catch (error) {
+        showError('Error loading pricing plans: ' + error.message);
+    }
+}
+
+function renderPricingCards(plans) {
+    const grid = document.getElementById('pricing-grid');
+    
+    if (plans.length === 0) {
+        grid.innerHTML = `
+            <div class="no-plans">
+                <h3>No Plans Available</h3>
+                <p>Subscription plans will appear here once they're created.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const cardsHtml = plans.map((plan, index) => {
+        const isPopular = index === 1 && plans.length > 2; // Make middle plan popular by default
+        
+        return `
+            <div class="pricing-card ${isPopular ? 'popular' : ''}">
+                ${isPopular ? '<div class="popular-badge">Most Popular</div>' : ''}
+                
+                <div class="card-header">
+                    <h3 class="plan-name">${plan.name}</h3>
+                    <div class="price-section">
+                        <span class="price">$${plan.price}</span>
+                        <span class="period">/${plan.billing_period_display.toLowerCase()}</span>
+                    </div>
+                    ${plan.description ? `<p class="plan-description">${plan.description}</p>` : ''}
+                </div>
+                
+                ${plan.trial_period_days > 0 ? `
+                <div class="trial-info">
+                    <svg class="trial-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>${plan.trial_period_days} day free trial</span>
+                </div>
+                ` : ''}
+                
+                <div class="features-section">
+                    <h4>What's included:</h4>
+                    <ul class="features-list">
+                        ${plan.features.map(feature => `
+                            <li class="feature-item">
+                                <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span>${feature}</span>
+                            </li>
+                        `).join('')}
+                        ${plan.features.length === 0 ? '<li class="feature-item"><svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg><span>All basic features included</span></li>' : ''}
+                    </ul>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="/subscriptions/subscribe/${plan.slug}/" class="cta-button ${isPopular ? 'primary' : 'secondary'}">
+                        ${plan.trial_period_days > 0 ? 'Start Free Trial' : 'Get Started'}
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    grid.innerHTML = cardsHtml;
+}
+
+function showError(message) {
+    const grid = document.getElementById('pricing-grid');
+    grid.innerHTML = `
+        <div class="error-state">
+            <p class="error-message">${message}</p>
+            <button onclick="loadPricingPlans()" class="retry-button">Try Again</button>
+        </div>
+    `;
+}
+</script>
+
+<style>
+:root {
+    --primary-color: var(--bs-primary, var(--primary, #3b82f6));
+    --primary-hover: var(--bs-primary-dark, var(--primary-dark, #2563eb));
+    --secondary-color: var(--bs-secondary, var(--secondary, #6b7280));
+    --success-color: var(--bs-success, var(--success, #059669));
+    --border-color: var(--bs-border-color, var(--border, #e5e7eb));
+}
+
+.pricing-cards-container {
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.pricing-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e5e7eb;
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.pricing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.pricing-card.popular {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.price-section {
+    margin: 1rem 0;
+}
+
+.price {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+.period {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-left: 0.25rem;
+}
+
+.plan-description {
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.trial-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--success-color);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.trial-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+.features-section h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.feature-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--success-color);
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.card-footer {
+    margin-top: 2rem;
+}
+
+.cta-button {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.cta-button.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 40%, transparent);
+}
+
+.cta-button.secondary {
+    background: #f9fafb;
+    color: var(--secondary-color);
+    border: 2px solid var(--border-color);
+}
+
+.cta-button.secondary:hover {
+    background: #f3f4f6;
+    border-color: var(--secondary-color);
+}
+
+.loading-state, .error-state, .no-plans {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #dc2626;
+    margin-bottom: 1rem;
+}
+
+.retry-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.retry-button:hover {
+    background: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .pricing-card.popular {
+        transform: none;
+    }
+    
+    .pricing-cards-container {
+        padding: 1rem;
+    }
+}
+</style>

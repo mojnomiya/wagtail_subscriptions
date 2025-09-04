@@ -3,45 +3,37 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from ..models import Subscription
+from .tenant_manager import TenantSubscriptionManager
 
 
-class SubscriptionRequiredMixin(LoginRequiredMixin):
-    """Mixin to require an active subscription"""
+class SubscriptionRequiredMixin:
+    """Mixin to require an active subscription (works in both single/multi-tenant modes)"""
     subscription_redirect_url = '/subscriptions/pricing/'
     
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return super().dispatch(request, *args, **kwargs)
-        
-        try:
-            subscription = Subscription.objects.get(
-                user=request.user,
-                status__in=['trialing', 'active']
-            )
-            request.subscription = subscription
-        except Subscription.DoesNotExist:
+        plan = TenantSubscriptionManager.get_active_plan(request)
+        if not plan:
             messages.warning(request, _('An active subscription is required to access this feature.'))
             return redirect(self.subscription_redirect_url)
         
+        request.subscription_plan = plan
         return super().dispatch(request, *args, **kwargs)
 
 
-class FeatureRequiredMixin(SubscriptionRequiredMixin):
-    """Mixin to require access to a specific feature"""
+class FeatureRequiredMixin:
+    """Mixin to require access to a specific feature (works in both single/multi-tenant modes)"""
     required_feature = None
+    subscription_redirect_url = '/subscriptions/pricing/'
     
     def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
+        if self.required_feature and not TenantSubscriptionManager.has_feature_access(request, self.required_feature):
+            messages.warning(
+                request,
+                _('Your current subscription plan does not include access to this feature.')
+            )
+            return redirect(self.subscription_redirect_url)
         
-        if hasattr(request, 'subscription') and self.required_feature:
-            if not request.subscription.has_feature_access(self.required_feature):
-                messages.warning(
-                    request,
-                    _('Your current subscription plan does not include access to this feature.')
-                )
-                return redirect(self.subscription_redirect_url)
-        
-        return response
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AdminSubscriptionMixin:
