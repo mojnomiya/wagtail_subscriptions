@@ -1,9 +1,7 @@
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-User = get_user_model()
 
 
 class AuditLog(models.Model):
@@ -19,7 +17,9 @@ class AuditLog(models.Model):
         ("bulk_action", _("Bulk Action")),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)
     object_id = models.CharField(max_length=100, blank=True)
