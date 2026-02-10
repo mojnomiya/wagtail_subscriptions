@@ -1,6 +1,15 @@
 # Wagtail Subscriptions
 
+[![PyPI version](https://badge.fury.io/py/wagtail-subscriptions.svg)](https://badge.fury.io/py/wagtail-subscriptions)
+[![Documentation Status](https://readthedocs.org/projects/wagtail-subscriptions/badge/?version=latest)](https://wagtail-subscriptions.readthedocs.io/en/latest/?badge=latest)
+[![Python Version](https://img.shields.io/pypi/pyversions/wagtail-subscriptions.svg)](https://pypi.org/project/wagtail-subscriptions/)
+[![Django Version](https://img.shields.io/badge/django-3.2%20%7C%204.2-blue.svg)](https://www.djangoproject.com/)
+[![Wagtail Version](https://img.shields.io/badge/wagtail-4.0%20%7C%205.0-teal.svg)](https://wagtail.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A comprehensive subscription management system for Wagtail CMS that provides everything you need to build a SaaS application with subscription billing.
+
+📚 **[Read the full documentation](https://wagtail-subscriptions.readthedocs.io/en/latest/)**
 
 ## Features
 
@@ -234,6 +243,7 @@ MIT License - see LICENSE file for details.
 
 ## Support
 
-- Documentation: https://wagtail-subscriptions.readthedocs.io/
-- Issues: https://github.com/yourusername/wagtail-subscriptions/issues
-- Discussions: https://github.com/yourusername/wagtail-subscriptions/discussions
+- **Documentation**: https://wagtail-subscriptions.readthedocs.io/en/latest/
+- **Issues**: https://github.com/yourusername/wagtail-subscriptions/issues
+- **Discussions**: https://github.com/yourusername/wagtail-subscriptions/discussions
+- **PyPI**: https://pypi.org/project/wagtail-subscriptions/

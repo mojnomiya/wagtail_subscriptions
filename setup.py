@@ -14,7 +14,7 @@ except FileNotFoundError:
 
 setup(
     name="wagtail-subscriptions",
-    version="0.1.0",
+    version="0.1.1",
     author="Wagtail Subscriptions Team",
     author_email="contact@wagtail-subscriptions.org",
     description="A comprehensive subscription management system for Wagtail CMS",
@@ -54,6 +54,6 @@ setup(
     project_urls={
         "Bug Reports": "https://github.com/wagtail-subscriptions/wagtail-subscriptions/issues",
         "Source": "https://github.com/wagtail-subscriptions/wagtail-subscriptions",
-        "Documentation": "https://wagtail-subscriptions.readthedocs.io/",
+        "Documentation": "https://wagtail-subscriptions.readthedocs.io/en/latest/",
     },
 )
