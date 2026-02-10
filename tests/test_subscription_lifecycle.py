@@ -55,14 +55,18 @@ class TestSubscriptionLifecycle(TestCase):
         assert subscription.status == "active"
 
     def test_duplicate_subscription_prevention(self):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
         # Create existing subscription
         Subscription.objects.create(
             user=self.user,
             plan=self.basic_plan,
             status="active",
             external_id="sub_existing",
-            current_period_start="2024-01-01T00:00:00Z",
-            current_period_end="2024-02-01T00:00:00Z",
+            current_period_start=now,
+            current_period_end=now + timedelta(days=30),
         )
 
         # Try to create another subscription
@@ -75,14 +79,18 @@ class TestSubscriptionLifecycle(TestCase):
 
     @patch("wagtail_subscriptions.payments.get_payment_processor")
     def test_plan_upgrade(self, mock_get_processor):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
         # Create existing subscription
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.basic_plan,
             status="active",
             external_id="sub_test123",
-            current_period_start="2024-01-01T00:00:00Z",
-            current_period_end="2024-02-01T00:00:00Z",
+            current_period_start=now,
+            current_period_end=now + timedelta(days=30),
             payment_processor="stripe",
         )
 
@@ -107,14 +115,18 @@ class TestSubscriptionLifecycle(TestCase):
 
     @patch("wagtail_subscriptions.payments.get_payment_processor")
     def test_subscription_cancellation(self, mock_get_processor):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
         # Create subscription
         subscription = Subscription.objects.create(
             user=self.user,
             plan=self.basic_plan,
             status="active",
             external_id="sub_test123",
-            current_period_start="2024-01-01T00:00:00Z",
-            current_period_end="2024-02-01T00:00:00Z",
+            current_period_start=now,
+            current_period_end=now + timedelta(days=30),
             payment_processor="stripe",
         )
 
@@ -142,8 +154,11 @@ class TestSubscriptionLifecycle(TestCase):
         mock_processor.cancel_subscription.assert_called_once()
 
     def test_feature_access_check(self):
+        from django.utils import timezone
+        from datetime import timedelta
         from wagtail_subscriptions.models import Feature, Module, PlanFeature
 
+        now = timezone.now()
         # Create feature
         module = Module.objects.create(name="Test Module", slug="test")
         feature = Feature.objects.create(
@@ -159,8 +174,8 @@ class TestSubscriptionLifecycle(TestCase):
             plan=self.basic_plan,
             status="active",
             external_id="sub_test123",
-            current_period_start="2024-01-01T00:00:00Z",
-            current_period_end="2024-02-01T00:00:00Z",
+            current_period_start=now,
+            current_period_end=now + timedelta(days=30),
         )
 
         # Add feature to plan

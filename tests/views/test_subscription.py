@@ -23,7 +23,11 @@ class TestSubscribeView:
         )
 
     def test_get_context_data(self):
+        request = self.factory.get(f"/subscribe/{self.plan.slug}/")
+        request.user = self.user
+        
         view = SubscribeView()
+        view.request = request
         view.kwargs = {"plan_slug": "test-plan"}
         context = view.get_context_data()
         assert context["plan"] == self.plan
