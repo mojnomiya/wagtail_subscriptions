@@ -62,16 +62,16 @@ make check
 make lint
 
 # 4. Build package
-python -m build
+make build
 
 # 5. Test installation
-pip install dist/wagtail-subscriptions-1.0.0.tar.gz
+uv pip install dist/wagtail-subscriptions-1.0.0.tar.gz
 
 # 6. Upload to Test PyPI
-twine upload --repository testpypi dist/*
+uv run twine upload --repository testpypi dist/*
 
 # 7. Upload to PyPI
-twine upload dist/*
+uv run twine upload dist/*
 ```
 
 ## Post-Deployment Tasks
