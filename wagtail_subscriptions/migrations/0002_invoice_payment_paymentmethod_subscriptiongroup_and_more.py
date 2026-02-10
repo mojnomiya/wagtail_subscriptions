@@ -13,6 +13,32 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name="AuditLog",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("action", models.CharField(max_length=50)),
+                ("model_name", models.CharField(max_length=100)),
+                ("object_id", models.PositiveIntegerField()),
+                ("changes", models.JSONField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+            ],
+            options={
+                "verbose_name": "Audit Log",
+                "verbose_name_plural": "Audit Logs",
+                "ordering": ["-created_at"],
+            },
+        ),
+        migrations.CreateModel(
             name="Invoice",
             fields=[
                 (
