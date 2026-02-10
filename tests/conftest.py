@@ -43,10 +43,14 @@ def plan():
 
 @pytest.fixture
 def subscription(user, plan):
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    now = timezone.now()
     return Subscription.objects.create(
         user=user,
         plan=plan,
         status="active",
-        current_period_start="2024-01-01T00:00:00Z",
-        current_period_end="2024-02-01T00:00:00Z",
+        current_period_start=now,
+        current_period_end=now + timedelta(days=30),
     )

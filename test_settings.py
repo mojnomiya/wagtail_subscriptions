@@ -2,6 +2,7 @@ import os
 
 SECRET_KEY = 'test-secret-key'
 DEBUG = True
+USE_TZ = True
 
 DATABASES = {
     'default': {
