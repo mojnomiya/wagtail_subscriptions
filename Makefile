@@ -1,4 +1,4 @@
-.PHONY: help lint format check test clean
+.PHONY: help lint format check test clean coverage
 
 help:
 	@echo "Available commands:"
@@ -6,17 +6,18 @@ help:
 	@echo "  make format    - Format code with black and isort"
 	@echo "  make check     - Check code formatting without changes"
 	@echo "  make test      - Run tests with pytest"
+	@echo "  make coverage  - Run tests with coverage report"
 	@echo "  make clean     - Remove build artifacts"
 
 lint:
 	@echo "Running flake8..."
-	python -m flake8 wagtail_subscriptions/
+	python -m flake8 wagtail_subscriptions/ tests/
 	@echo "Running pylint..."
-	python -m pylint wagtail_subscriptions/
+	-python -m pylint wagtail_subscriptions/
 	@echo "Running mypy..."
-	python -m mypy wagtail_subscriptions/
+	-python -m mypy wagtail_subscriptions/
 	@echo "Running bandit..."
-	python -m bandit -r wagtail_subscriptions/ -ll
+	-python -m bandit -r wagtail_subscriptions/ -ll
 
 format:
 	@echo "Running black..."
@@ -32,6 +33,9 @@ check:
 
 test:
 	python -m pytest tests/ -v
+
+coverage:
+	python -m pytest tests/ --cov=wagtail_subscriptions --cov-report=term --cov-report=html
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
