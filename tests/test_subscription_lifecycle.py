@@ -1,15 +1,9 @@
 from unittest.mock import Mock, patch
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from wagtail_subscriptions.models import Customer, Subscription, SubscriptionPlan
-from wagtail_subscriptions.views.plan_management import (
-    CancelSubscriptionView,
-    ChangePlanView,
-)
-from wagtail_subscriptions.views.subscription import SubscribeView
+from wagtail_subscriptions.models import Subscription, SubscriptionPlan
 
 User = get_user_model()
 
@@ -32,7 +26,7 @@ class TestSubscriptionLifecycle(TestCase):
     def test_subscription_creation(self, mock_get_processor):
         from django.utils import timezone
         from datetime import timedelta
-        
+
         # Mock payment processor
         mock_processor = Mock()
         mock_processor.create_customer.return_value = {"id": "cus_test123"}
@@ -65,7 +59,7 @@ class TestSubscriptionLifecycle(TestCase):
     def test_duplicate_subscription_prevention(self):
         from django.utils import timezone
         from datetime import timedelta
-        
+
         now = timezone.now()
         # Create existing subscription
         Subscription.objects.create(
@@ -89,7 +83,7 @@ class TestSubscriptionLifecycle(TestCase):
     def test_plan_upgrade(self, mock_get_processor):
         from django.utils import timezone
         from datetime import timedelta
-        
+
         now = timezone.now()
         # Create existing subscription
         subscription = Subscription.objects.create(
@@ -122,7 +116,7 @@ class TestSubscriptionLifecycle(TestCase):
     def test_subscription_cancellation(self, mock_get_processor):
         from django.utils import timezone
         from datetime import timedelta
-        
+
         now = timezone.now()
         # Create subscription
         subscription = Subscription.objects.create(
@@ -184,5 +178,5 @@ class TestSubscriptionLifecycle(TestCase):
         PlanFeature.objects.create(plan=self.basic_plan, feature=feature, is_included=True)
 
         # Test feature access
-        assert subscription.has_feature_access("test-feature") == True
-        assert subscription.has_feature_access("nonexistent-feature") == False
+        assert subscription.has_feature_access("test-feature") is True
+        assert subscription.has_feature_access("nonexistent-feature") is False

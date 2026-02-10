@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.test import RequestFactory
 
-from wagtail_subscriptions.models import Feature, Module, Subscription, SubscriptionPlan
 from wagtail_subscriptions.permissions.decorators import (
     feature_required,
     subscription_required,
@@ -26,26 +25,26 @@ class TestSubscriptionRequired:
         @subscription_required
         def test_view(request):
             return HttpResponse("success")
-        
+
         # Just verify the decorator works
         assert test_view is not None
 
     def test_without_subscription(self):
         from django.contrib.messages.storage.fallback import FallbackStorage
         from django.contrib.sessions.middleware import SessionMiddleware
-        
+
         @subscription_required
         def test_view(request):
             return HttpResponse("success")
 
         request = self.factory.get("/")
         request.user = self.user
-        
+
         # Add session and messages middleware
         middleware = SessionMiddleware(lambda x: x)
         middleware.process_request(request)
         request.session.save()
-        
+
         setattr(request, '_messages', FallbackStorage(request))
 
         response = test_view(request)
@@ -79,6 +78,6 @@ class TestFeatureRequired:
         @feature_required("nonexistent-feature")
         def test_view(request):
             return HttpResponse("success")
-        
+
         # Just verify the decorator works
         assert test_view is not None

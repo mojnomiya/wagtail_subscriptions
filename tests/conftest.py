@@ -45,7 +45,7 @@ def plan():
 def subscription(user, plan):
     from django.utils import timezone
     from datetime import timedelta
-    
+
     now = timezone.now()
     return Subscription.objects.create(
         user=user,
