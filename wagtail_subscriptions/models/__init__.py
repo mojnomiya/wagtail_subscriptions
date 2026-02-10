@@ -1,5 +1,5 @@
 from .core import Customer, Subscription, SubscriptionPlan
-from .features import Feature, Module, PlanFeature
+from .features import Feature, Module, PlanFeature, UsageRecord
 from .permissions import SubscriptionGroup, SubscriptionPermission
 
 __all__ = [
@@ -9,6 +9,7 @@ __all__ = [
     "Feature",
     "Module",
     "PlanFeature",
+    "UsageRecord",
     "SubscriptionGroup",
     "SubscriptionPermission",
 ]
