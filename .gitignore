@@ -14,6 +14,7 @@ example_project/venv/
 *.log
 local_settings.py
 db.sqlite3
+*.db
 media/
 staticfiles/
 
@@ -31,6 +32,7 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+*.egg/
 
 # Testing
 .coverage

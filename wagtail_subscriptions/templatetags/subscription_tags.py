@@ -6,11 +6,11 @@ from ..permissions.tenant_manager import TenantSubscriptionManager
 register = template.Library()
 
 
-@register.inclusion_tag('wagtail_subscriptions/components/price_table.html', takes_context=True)
+@register.inclusion_tag("wagtail_subscriptions/components/price_table.html", takes_context=True)
 def price_table(context, plans=None, show_trial=True, highlight_plan=None):
     """
     Render subscription pricing table
-    
+
     Usage:
     {% load subscription_tags %}
     {% price_table %}
@@ -18,14 +18,14 @@ def price_table(context, plans=None, show_trial=True, highlight_plan=None):
     {% price_table highlight_plan="pro-plan" %}
     """
     if plans is None:
-        plans = SubscriptionPlan.objects.filter(is_active=True).order_by('sort_order', 'price')
-    
+        plans = SubscriptionPlan.objects.filter(is_active=True).order_by("sort_order", "price")
+
     return {
-        'plans': plans,
-        'show_trial': show_trial,
-        'highlight_plan': highlight_plan,
-        'request': context.get('request'),
-        'user': context.get('user'),
+        "plans": plans,
+        "show_trial": show_trial,
+        "highlight_plan": highlight_plan,
+        "request": context.get("request"),
+        "user": context.get("user"),
     }
 
 
@@ -42,17 +42,24 @@ def has_feature(request, feature_slug):
         return False
     return TenantSubscriptionManager.has_feature_access(request, feature_slug)
 
+
 @register.simple_tag(takes_context=True)
 def subscription_info(context):
     """Get subscription information for current context"""
-    request = context.get('request')
+    request = context.get("request")
     if not request:
         return None
     return TenantSubscriptionManager.get_subscriber_info(request)
 
-@register.inclusion_tag('wagtail_subscriptions/components/pricing_cards.html', takes_context=True)
-def pricing_cards(context):
+
+@register.inclusion_tag("wagtail_subscriptions/components/pricing_cards.html", takes_context=True)
+def pricing_cards(context, plans=None):
     """Render pricing cards component"""
+    if plans is None:
+        plans = SubscriptionPlan.objects.filter(is_active=True).order_by("sort_order", "price")
+
     return {
-        'request': context.get('request'),
+        "plans": plans,
+        "request": context.get("request"),
+        "user": context.get("user"),
     }

@@ -30,7 +30,7 @@
             <div class="metric-content">
                 <h3>{% trans "Monthly Revenue" %}</h3>
                 <div class="metric-value">${{ mrr|floatformat:2 }}</div>
-                <div class="metric-change positive">+12% {% trans "from last month" %}</div>
+                <div class="metric-change {% if growth_rate > 0 %}positive{% elif growth_rate < 0 %}negative{% else %}neutral{% endif %}">{{ growth_rate }}% {% trans "growth" %}</div>
             </div>
         </div>
         
@@ -39,7 +39,7 @@
             <div class="metric-content">
                 <h3>{% trans "Active Subscriptions" %}</h3>
                 <div class="metric-value">{{ total_subscriptions }}</div>
-                <div class="metric-change positive">+{{ total_subscriptions }} {% trans "total" %}</div>
+                <div class="metric-change positive">+{{ new_subs_this_month }} {% trans "this month" %}</div>
             </div>
         </div>
         
@@ -48,7 +48,7 @@
             <div class="metric-content">
                 <h3>{% trans "Total Customers" %}</h3>
                 <div class="metric-value">{{ total_customers }}</div>
-                <div class="metric-change neutral">{{ total_customers }} {% trans "registered" %}</div>
+                <div class="metric-change neutral">{{ churn_rate }}% {% trans "churn rate" %}</div>
             </div>
         </div>
         
@@ -57,13 +57,33 @@
             <div class="metric-content">
                 <h3>{% trans "Active Plans" %}</h3>
                 <div class="metric-value">{{ total_plans }}</div>
-                <div class="metric-change neutral">{{ total_plans }} {% trans "available" %}</div>
+                <div class="metric-change neutral">{{ canceled_this_month }} {% trans "canceled" %}</div>
             </div>
         </div>
     </div>
     
-    <div class="row" style="margin-top: 30px;">
-        <div class="col8">
+    <!-- Plan Distribution -->
+    {% if plan_distribution %}
+    <div class="panel" style="margin-bottom: 30px;">
+        <h2 class="panel-title">{% trans "Plan Distribution" %}</h2>
+        <div style="padding: 20px;">
+            <div class="plan-stats">
+                {% for plan_data in plan_distribution %}
+                <div class="plan-stat-item">
+                    <div class="plan-stat-info">
+                        <strong>{{ plan_data.plan__name }}</strong>
+                        <span class="plan-stat-count">{{ plan_data.count }} {% trans "subscribers" %}</span>
+                    </div>
+                    <div class="plan-stat-revenue">${{ plan_data.revenue|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <div class="col6">
             <div class="panel">
                 <h2 class="panel-title">{% trans "Recent Subscriptions" %}</h2>
                 {% if recent_subscriptions %}
@@ -104,7 +124,46 @@
             </div>
         </div>
         
-        <div class="col4">
+        <div class="col6">
+            <div class="panel">
+                <h2 class="panel-title">{% trans "Recent Cancellations" %}</h2>
+                {% if recent_cancellations %}
+                <table class="listing">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Customer" %}</th>
+                            <th>{% trans "Plan" %}</th>
+                            <th>{% trans "Date" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subscription in recent_cancellations %}
+                        <tr>
+                            <td>
+                                <div class="customer-info">
+                                    <strong>{{ subscription.user.get_full_name|default:subscription.user.username }}</strong>
+                                    <br><small>{{ subscription.user.email }}</small>
+                                </div>
+                            </td>
+                            <td><span class="plan-badge">{{ subscription.plan.name }}</span></td>
+                            <td>{{ subscription.canceled_at|date:"M j, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">✅</div>
+                    <h3>{% trans "No recent cancellations" %}</h3>
+                    <p>{% trans "Great! No cancellations this month" %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" style="margin-top: 30px;">
+        <div class="col12">
             <div class="panel">
                 <h2 class="panel-title">{% trans "Quick Actions" %}</h2>
                 <div class="action-grid">
@@ -195,6 +254,41 @@
 .metric-change {
     font-size: 0.8em;
     opacity: 0.8;
+}
+
+.metric-change.positive { color: #28a745; }
+.metric-change.negative { color: #dc3545; }
+.metric-change.neutral { color: rgba(255,255,255,0.8); }
+
+.plan-stats {
+    display: grid;
+    gap: 15px;
+}
+
+.plan-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.plan-stat-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.plan-stat-count {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.plan-stat-revenue {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 1.1em;
 }
 
 .panel {

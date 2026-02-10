@@ -5,15 +5,32 @@ A comprehensive subscription management package for Wagtail CMS that enables Saa
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Getting Started:
 
    installation
    quickstart
-   models
-   payments
-   permissions
-   analytics
-   api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Core Concepts:
+
+   architecture
+   api-reference
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Integration Guides:
+
+   payment-integration
+   multi-tenant
+   deployment
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Development:
+
+   CONTRIBUTING
+   TEST_GUIDE
 
 Features
 --------
@@ -22,16 +39,18 @@ Features
 * **Feature System**: Hierarchical feature organization with usage quotas
 * **Payment Integration**: Multi-provider support (Stripe, Paddle, PayPal)
 * **Permission Control**: Django permission integration with subscription-based access
+* **Multi-Tenant Support**: Automatic detection and support for django-tenant-schemas
 * **Wagtail Integration**: Native admin interface and content integration
 * **Customer Portal**: Self-service subscription management
 * **Analytics**: Built-in reporting and usage tracking
+* **Audit Logging**: Complete audit trail for compliance
 
 Quick Start
 -----------
 
 1. Install the package::
 
-    pip install wagtail-subscriptions[stripe]
+    pip install wagtail-subscriptions
 
 2. Add to INSTALLED_APPS::
 
@@ -55,6 +74,7 @@ Quick Start
 4. Run migrations::
 
     python manage.py migrate
+    python manage.py setup_subscription_permissions
 
 Indices and tables
 ==================

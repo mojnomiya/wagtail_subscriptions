@@ -1,100 +1,178 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "wagtail_subscriptions/base.html" %}
+{% load subscription_tags %}
 
-{% block title %}{% trans "Customer Portal" %}{% endblock %}
+{% block title %}Customer Portal{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{% trans "Subscription Management" %}</h1>
-            <p class="text-gray-600 mt-2">{% trans "Manage your subscription and billing information" %}</p>
-        </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Customer Portal</h1>
         
-        {% if subscription %}
-        <div class="grid gap-6 lg:grid-cols-2">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-gray-900">{% trans "Current Subscription" %}</h2>
-                    <span class="px-3 py-1 text-sm font-medium rounded-full 
+        <!-- Subscription Overview -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Current Subscription</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-sm text-gray-600">Plan</p>
+                    <p class="text-lg font-medium">{{ subscription.plan.name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Status</p>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
                         {% if subscription.status == 'active' %}bg-green-100 text-green-800
                         {% elif subscription.status == 'trialing' %}bg-blue-100 text-blue-800
-                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {% elif subscription.status == 'canceled' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
                         {{ subscription.get_status_display }}
                     </span>
                 </div>
-                
-                <div class="space-y-4">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">{% trans "Plan" %}</span>
-                        <span class="font-medium">{{ subscription.plan.name }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">{% trans "Price" %}</span>
-                        <span class="font-medium">${{ subscription.plan.price }}/{{ subscription.plan.get_billing_period_display|lower }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">{% trans "Current Period" %}</span>
-                        <span class="font-medium">{{ subscription.current_period_start|date:"M j" }} - {{ subscription.current_period_end|date:"M j, Y" }}</span>
-                    </div>
-                    
-                    {% if subscription.trial_end %}
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">{% trans "Trial Ends" %}</span>
-                        <span class="font-medium text-blue-600">{{ subscription.trial_end|date:"M j, Y" }}</span>
-                    </div>
-                    {% endif %}
+                <div>
+                    <p class="text-sm text-gray-600">Next Billing</p>
+                    <p class="text-lg font-medium">{{ subscription.current_period_end|date:"M d, Y" }}</p>
                 </div>
             </div>
             
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Quick Actions" %}</h2>
-                <div class="space-y-3">
-                    <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                            </svg>
-                            <span class="font-medium">{% trans "Update Payment Method" %}</span>
+            {% if subscription.is_trial %}
+            <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p class="text-blue-800">
+                    <strong>Trial Period:</strong> Your trial ends on {{ subscription.trial_end|date:"M d, Y" }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Plan Management -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Plan Management</h2>
+            
+            {% if subscription.status != 'canceled' %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Change Plan -->
+                <div>
+                    <h3 class="font-medium mb-3">Change Plan</h3>
+                    <form method="post" action="{% url 'wagtail_subscriptions:change_plan' %}">
+                        {% csrf_token %}
+                        <select name="plan_slug" class="w-full p-2 border rounded-md mb-3">
+                            {% for plan in available_plans %}
+                            <option value="{{ plan.slug }}">{{ plan.name }} - ${{ plan.price }}/{{ plan.billing_period }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Change Plan
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Cancel Subscription -->
+                <div>
+                    <h3 class="font-medium mb-3">Cancel Subscription</h3>
+                    <form method="post" action="{% url 'wagtail_subscriptions:cancel_subscription' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="cancel_immediately" value="true" class="mr-2">
+                                Cancel immediately (otherwise at period end)
+                            </label>
                         </div>
-                    </button>
-                    
-                    <button class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <span class="font-medium">{% trans "Download Invoice" %}</span>
-                        </div>
-                    </button>
-                    
-                    <button class="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <span class="font-medium">{% trans "Cancel Subscription" %}</span>
-                        </div>
-                    </button>
+                        <textarea name="reason" placeholder="Reason for cancellation (optional)" 
+                                class="w-full p-2 border rounded-md mb-3" rows="2"></textarea>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                                onclick="return confirm('Are you sure you want to cancel?')">
+                            Cancel Subscription
+                        </button>
+                    </form>
                 </div>
             </div>
-        </div>
-        
-        {% else %}
-        <div class="text-center py-16">
-            <div class="max-w-md mx-auto">
-                <svg class="w-16 h-16 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-                </svg>
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">{% trans "No Active Subscription" %}</h2>
-                <p class="text-gray-600 mb-8">{% trans "You don't have an active subscription. Choose a plan to get started." %}</p>
-                <a href="{% url 'wagtail_subscriptions:pricing' %}" 
-                   class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-8 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
-                    {% trans "View Plans" %}
-                </a>
+            {% else %}
+            <!-- Reactivate -->
+            <div>
+                <h3 class="font-medium mb-3">Reactivate Subscription</h3>
+                <p class="text-gray-600 mb-3">Your subscription was canceled. You can reactivate it to continue using our services.</p>
+                <form method="post" action="{% url 'wagtail_subscriptions:reactivate_subscription' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        Reactivate Subscription
+                    </button>
+                </form>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <!-- Billing History -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Billing History</h2>
+            {% if recent_payments %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-2">Date</th>
+                            <th class="text-left py-2">Amount</th>
+                            <th class="text-left py-2">Status</th>
+                            <th class="text-left py-2">Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in recent_payments %}
+                        <tr class="border-b">
+                            <td class="py-2">{{ payment.created_at|date:"M d, Y" }}</td>
+                            <td class="py-2">${{ payment.amount }}</td>
+                            <td class="py-2">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if payment.status == 'succeeded' %}bg-green-100 text-green-800
+                                    {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="py-2">{{ payment.payment_method.get_payment_type_display|default:"Card" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-600">No billing history available.</p>
+            {% endif %}
+        </div>
+
+        <!-- Feature Usage -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Feature Usage</h2>
+            {% subscription_info as sub_info %}
+            {% plan_features subscription.plan as features %}
+            
+            {% if features %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for plan_feature in features %}
+                {% if plan_feature.feature.feature_type == 'quota' %}
+                <div class="p-4 border rounded-lg">
+                    <h3 class="font-medium">{{ plan_feature.feature.name }}</h3>
+                    <div class="mt-2">
+                        {% with quota=plan_feature.effective_quota %}
+                        {% if quota %}
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 45%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Used: 45 / {{ quota }} {{ plan_feature.feature.quota_unit }}</p>
+                        {% else %}
+                        <p class="text-sm text-green-600">Unlimited</p>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-4 border rounded-lg">
+                    <h3 class="font-medium">{{ plan_feature.feature.name }}</h3>
+                    <p class="text-sm text-green-600 mt-1">✓ Included</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-600">No features configured for this plan.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

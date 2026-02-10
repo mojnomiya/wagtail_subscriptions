@@ -15,58 +15,126 @@
 {% include "wagtailadmin/shared/header.html" with title="Customers" icon="group" %}
 
 <div class="nice-padding" style="padding-left: 50px; padding-right: 50px;">
+    <!-- Filters -->
+    <form method="get" class="filters" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+        <div style="display: flex; gap: 15px; align-items: end;">
+            <div>
+                <label>{% trans "Search" %}</label>
+                <input type="text" name="search" placeholder="{% trans 'Email or name...' %}" value="{{ current_filters.search }}" style="width: 200px;">
+            </div>
+            <div>
+                <label>{% trans "Status" %}</label>
+                <select name="status">
+                    <option value="">{% trans "All Statuses" %}</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>{% trans "Plan" %}</label>
+                <select name="plan">
+                    <option value="">{% trans "All Plans" %}</option>
+                    {% for plan in plans %}
+                    <option value="{{ plan.slug }}" {% if current_filters.plan == plan.slug %}selected{% endif %}>{{ plan.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="button">{% trans "Filter" %}</button>
+                <a href="{% url 'wagtail_subscriptions_admin:customers' %}" class="button button-secondary">{% trans "Clear" %}</a>
+            </div>
+        </div>
+    </form>
+    
     {% if customers %}
-    <table class="listing">
-        <thead>
-            <tr>
-                <th>{% trans "User" %}</th>
-                <th>{% trans "Email" %}</th>
-                <th>{% trans "Company" %}</th>
-                <th>{% trans "Subscription" %}</th>
-                <th>{% trans "Status" %}</th>
-                <th>{% trans "Joined" %}</th>
-                <th>{% trans "Actions" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in customers %}
-            <tr>
-                <td><strong>{{ customer.user.get_full_name|default:customer.user.username }}</strong></td>
-                <td>{{ customer.billing_email|default:customer.user.email }}</td>
-                <td>{{ customer.company_name|default:"-" }}</td>
-                <td>
-                    {% with customer.user.subscriptions.first as subscription %}
-                    {% if subscription %}
-                        {{ subscription.plan.name }}
-                    {% else %}
-                        <em>{% trans "No subscription" %}</em>
-                    {% endif %}
-                    {% endwith %}
-                </td>
-                <td>
-                    {% with customer.user.subscriptions.first as subscription %}
-                    {% if subscription %}
-                        <span class="status-tag status-{{ subscription.status }}">{{ subscription.get_status_display }}</span>
-                    {% else %}
-                        <span class="status-tag inactive">{% trans "No subscription" %}</span>
-                    {% endif %}
-                    {% endwith %}
-                </td>
-                <td>{{ customer.created_at|date:"M j, Y" }}</td>
-                <td>
-                    <a href="/admin/auth/user/{{ customer.user.id }}/" class="button button-small">{% trans "View User" %}</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Bulk Actions -->
+    <form method="post" id="bulk-form">
+        {% csrf_token %}
+        <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+            <select name="action">
+                <option value="">{% trans "Bulk Actions" %}</option>
+                <option value="cancel_subscriptions">{% trans "Cancel Subscriptions" %}</option>
+                <option value="export_customers">{% trans "Export Selected" %}</option>
+            </select>
+            <button type="submit" class="button button-secondary" onclick="return confirm('{% trans "Are you sure?" %}')">{% trans "Apply" %}</button>
+        </div>
+    
+        <table class="listing">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all"></th>
+                    <th>{% trans "User" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Company" %}</th>
+                    <th>{% trans "Subscription" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "MRR" %}</th>
+                    <th>{% trans "Joined" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td><input type="checkbox" name="customer_ids" value="{{ customer.id }}"></td>
+                    <td><strong>{{ customer.user.get_full_name|default:customer.user.username }}</strong></td>
+                    <td>{{ customer.billing_email|default:customer.user.email }}</td>
+                    <td>{{ customer.company_name|default:"-" }}</td>
+                    <td>
+                        {% with customer.user.subscriptions.first as subscription %}
+                        {% if subscription %}
+                            {{ subscription.plan.name }}
+                        {% else %}
+                            <em>{% trans "No subscription" %}</em>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with customer.user.subscriptions.first as subscription %}
+                        {% if subscription %}
+                            <span class="status-tag status-{{ subscription.status }}">{{ subscription.get_status_display }}</span>
+                        {% else %}
+                            <span class="status-tag inactive">{% trans "No subscription" %}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with customer.user.subscriptions.first as subscription %}
+                        {% if subscription %}
+                            ${{ subscription.plan.price }}
+                        {% else %}
+                            $0
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>{{ customer.created_at|date:"M j, Y" }}</td>
+                    <td>
+                        <a href="/admin/auth/user/{{ customer.user.id }}/" class="button button-small">{% trans "View User" %}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
     {% else %}
     <div class="help-block">
-        <h2>{% trans "No customers yet" %}</h2>
-        <p>{% trans "Customers will appear here when they sign up for subscriptions." %}</p>
+        <h2>{% trans "No customers found" %}</h2>
+        <p>{% trans "Try adjusting your filters or search terms." %}</p>
     </div>
     {% endif %}
 </div>
+
+<script>
+// Select all functionality
+const selectAll = document.getElementById('select-all');
+if (selectAll) {
+    selectAll.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('input[name="customer_ids"]');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+}
+</script>
 
 <style>
 .status-tag {

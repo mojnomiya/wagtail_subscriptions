@@ -1,9 +1,116 @@
-{% extends "base.html" %}
-{% load i18n subscription_tags %}
+{% extends "wagtail_subscriptions/base.html" %}
+{% load subscription_tags %}
 
-{% block title %}{% trans "Pricing Plans" %}{% endblock %}
+{% block title %}Pricing Plans{% endblock %}
 
 {% block content %}
-<!-- Dynamic Pricing Cards Component -->
-{% pricing_cards %}
+<div class="bg-white">
+    <!-- Hero Section -->
+    <div class="container mx-auto px-4 py-16 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Simple, Transparent Pricing
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Choose the perfect plan for your needs. Upgrade or downgrade at any time.
+        </p>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="container mx-auto px-4 pb-16">
+        {% price_table %}
+    </div>
+
+    <!-- Features Comparison -->
+    <div class="bg-gray-50 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Feature Comparison</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full bg-white rounded-lg shadow-md">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left p-4 font-medium">Features</th>
+                            {% for plan in plans %}
+                            <th class="text-center p-4 font-medium">{{ plan.name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in modules %}
+                        <tr class="border-b bg-gray-50">
+                            <td colspan="{{ plans|length|add:1 }}" class="p-4 font-semibold text-gray-900">
+                                {{ module.name }}
+                            </td>
+                        </tr>
+                        {% for feature in module.features.all %}
+                        <tr class="border-b">
+                            <td class="p-4">
+                                <div>
+                                    <p class="font-medium">{{ feature.name }}</p>
+                                    {% if feature.description %}
+                                    <p class="text-sm text-gray-600">{{ feature.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% for plan in plans %}
+                            <td class="p-4 text-center">
+                                {% with plan_feature=plan.plan_features.all|dictsort:"feature.slug" %}
+                                {% for pf in plan_feature %}
+                                {% if pf.feature.slug == feature.slug %}
+                                    {% if pf.is_included %}
+                                        {% if feature.feature_type == 'quota' %}
+                                            {% if pf.effective_quota %}
+                                                <span class="text-green-600 font-medium">{{ pf.effective_quota }} {{ feature.quota_unit }}</span>
+                                            {% else %}
+                                                <span class="text-green-600 font-medium">Unlimited</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-green-600">✓</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+        
+        <div class="max-w-3xl mx-auto">
+            <div class="space-y-6">
+                <div class="border-b pb-6">
+                    <h3 class="text-lg font-semibold mb-2">Can I change my plan at any time?</h3>
+                    <p class="text-gray-600">Yes, you can upgrade or downgrade your plan at any time. Changes are prorated and will be reflected in your next billing cycle.</p>
+                </div>
+                
+                <div class="border-b pb-6">
+                    <h3 class="text-lg font-semibold mb-2">Do you offer a free trial?</h3>
+                    <p class="text-gray-600">Yes, most of our plans come with a free trial period. You can start using our service immediately without any upfront payment.</p>
+                </div>
+                
+                <div class="border-b pb-6">
+                    <h3 class="text-lg font-semibold mb-2">What payment methods do you accept?</h3>
+                    <p class="text-gray-600">We accept all major credit cards, PayPal, and other payment methods through our secure payment processors.</p>
+                </div>
+                
+                <div class="border-b pb-6">
+                    <h3 class="text-lg font-semibold mb-2">Can I cancel my subscription?</h3>
+                    <p class="text-gray-600">Yes, you can cancel your subscription at any time from your customer portal. You'll continue to have access until the end of your current billing period.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

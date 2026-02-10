@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2024-01-XX
+## [Unreleased]
+
+### Planned for v1.0.0
+- REST API endpoints for subscription management
+- Advanced automation and dunning management
+- Performance optimizations and caching
+- Final security audit
+
+## [1.0.0-beta] - 2024-01-XX
 
 ### Added
 - Initial release of wagtail-subscriptions

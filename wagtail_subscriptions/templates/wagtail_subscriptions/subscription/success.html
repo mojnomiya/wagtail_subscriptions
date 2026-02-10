@@ -1,46 +1,99 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "wagtail_subscriptions/base.html" %}
 
-{% block title %}{% trans "Subscription Successful" %}{% endblock %}
+{% block title %}Subscription Successful{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden text-center">
-        <div class="bg-gradient-to-r from-green-500 to-blue-500 px-6 py-8 text-white">
-            <div class="w-16 h-16 mx-auto mb-4 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+<div class="container mx-auto px-4 py-16">
+    <div class="max-w-2xl mx-auto text-center">
+        <!-- Success Icon -->
+        <div class="mb-8">
+            <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold">{% trans "Welcome!" %}</h1>
-            <p class="mt-2 opacity-90">{% trans "Your subscription is now active" %}</p>
         </div>
-        
-        <div class="px-6 py-8">
-            <div class="mb-6">
-                <div class="w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
+
+        <!-- Success Message -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            {% if subscription.is_trial %}
+                Welcome! Your Free Trial Has Started
+            {% else %}
+                Subscription Successful!
+            {% endif %}
+        </h1>
+
+        {% if subscription %}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Subscription Details</h2>
+            
+            <div class="space-y-3 text-left">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Plan:</span>
+                    <span class="font-medium">{{ subscription.plan.name }}</span>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Subscription Created Successfully" %}</h2>
-                <p class="text-gray-600">{% trans "You now have access to all the features in your plan." %}</p>
-            </div>
-            
-            <div class="space-y-3">
-                <a href="{% url 'wagtail_subscriptions:customer_portal' %}" 
-                   class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 inline-block">
-                    {% trans "Manage Subscription" %}
-                </a>
                 
-                <a href="/" 
-                   class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors inline-block">
-                    {% trans "Go to Dashboard" %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Price:</span>
+                    <span class="font-medium">${{ subscription.plan.price }}/{{ subscription.plan.get_billing_period_display|lower }}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="font-medium text-green-600">{{ subscription.get_status_display }}</span>
+                </div>
+                
+                {% if subscription.is_trial %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Trial Ends:</span>
+                    <span class="font-medium">{{ subscription.trial_end|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Next Billing:</span>
+                    <span class="font-medium">{{ subscription.current_period_end|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Next Steps -->
+        <div class="bg-blue-50 rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">What's Next?</h3>
+            <div class="text-blue-800 space-y-2">
+                {% if subscription.is_trial %}
+                <p>✓ Your {{ subscription.plan.trial_period_days }}-day free trial is now active</p>
+                <p>✓ Explore all features with no restrictions</p>
+                <p>✓ You'll be charged ${{ subscription.plan.price }} on {{ subscription.trial_end|date:"M d, Y" }}</p>
+                {% else %}
+                <p>✓ Your subscription is now active</p>
+                <p>✓ Access all features immediately</p>
+                <p>✓ Manage your subscription anytime</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-4">
+            <a href="{% url 'wagtail_subscriptions:customer_portal' %}" 
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-md font-medium transition-colors">
+                Go to Customer Portal
+            </a>
+            
+            <div>
+                <a href="/" class="text-blue-600 hover:text-blue-700 font-medium">
+                    Continue to Dashboard
                 </a>
             </div>
-            
-            <div class="mt-6 text-xs text-gray-500">
-                <p>{% trans "Need help? Contact our support team anytime." %}</p>
+        </div>
+
+        <!-- Support -->
+        <div class="mt-12 pt-8 border-t">
+            <p class="text-gray-600 mb-4">Need help getting started?</p>
+            <div class="space-x-6">
+                <a href="/help" class="text-blue-600 hover:text-blue-700">Help Center</a>
+                <a href="/contact" class="text-blue-600 hover:text-blue-700">Contact Support</a>
             </div>
         </div>
     </div>

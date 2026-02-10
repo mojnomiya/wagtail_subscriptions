@@ -1,9 +1,18 @@
 -r requirements.txt
+
+# Testing
 pytest>=6.0
 pytest-django>=4.0
-black>=22.0
-flake8>=4.0
 coverage>=6.0
+
+# Code Quality & Linting
+black>=22.0
+isort>=5.0
+flake8>=4.0
+pylint>=2.0
+mypy>=1.0
+bandit>=1.7
+
+# Payment Processors
 stripe>=5.0
-paddle-python-sdk>=1.0
 paypalrestsdk>=1.13

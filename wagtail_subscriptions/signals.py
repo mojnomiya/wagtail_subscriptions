@@ -13,8 +13,8 @@ def create_customer_profile(sender, instance, created, **kwargs):
         Customer.objects.get_or_create(
             user=instance,
             defaults={
-                'billing_email': instance.email,
-            }
+                "billing_email": instance.email,
+            },
         )
 
 

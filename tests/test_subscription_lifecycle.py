@@ -1,0 +1,169 @@
+import pytest
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from unittest.mock import patch, Mock
+from wagtail_subscriptions.models import SubscriptionPlan, Subscription, Customer
+from wagtail_subscriptions.views.subscription import SubscribeView
+from wagtail_subscriptions.views.plan_management import (
+    ChangePlanView,
+    CancelSubscriptionView,
+)
+
+User = get_user_model()
+
+
+class TestSubscriptionLifecycle(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser", email="test@example.com", password="testpass123"
+        )
+
+        self.basic_plan = SubscriptionPlan.objects.create(
+            name="Basic Plan", slug="basic", price=9.99, billing_period="monthly"
+        )
+
+        self.pro_plan = SubscriptionPlan.objects.create(
+            name="Pro Plan", slug="pro", price=19.99, billing_period="monthly"
+        )
+
+    @patch("wagtail_subscriptions.payments.get_payment_processor")
+    def test_subscription_creation(self, mock_get_processor):
+        # Mock payment processor
+        mock_processor = Mock()
+        mock_processor.create_customer.return_value = "cus_test123"
+        mock_processor.create_subscription.return_value = {
+            "id": "sub_test123",
+            "status": "active",
+            "current_period_start": 1640995200,
+            "current_period_end": 1643673600,
+            "trial_end": None,
+        }
+        mock_processor.__class__.__name__ = "StripePaymentProcessor"
+        mock_get_processor.return_value = mock_processor
+
+        # Create subscription
+        self.client.force_login(self.user)
+        response = self.client.post(f"/subscriptions/subscribe/{self.basic_plan.slug}/")
+
+        # Verify subscription created
+        subscription = Subscription.objects.filter(user=self.user).first()
+        assert subscription is not None
+        assert subscription.plan == self.basic_plan
+        assert subscription.external_id == "sub_test123"
+        assert subscription.status == "active"
+
+    def test_duplicate_subscription_prevention(self):
+        # Create existing subscription
+        Subscription.objects.create(
+            user=self.user,
+            plan=self.basic_plan,
+            status="active",
+            external_id="sub_existing",
+            current_period_start="2024-01-01T00:00:00Z",
+            current_period_end="2024-02-01T00:00:00Z",
+        )
+
+        # Try to create another subscription
+        self.client.force_login(self.user)
+        response = self.client.post(f"/subscriptions/subscribe/{self.pro_plan.slug}/")
+
+        # Should redirect with warning
+        assert response.status_code == 302
+        assert Subscription.objects.filter(user=self.user).count() == 1
+
+    @patch("wagtail_subscriptions.payments.get_payment_processor")
+    def test_plan_upgrade(self, mock_get_processor):
+        # Create existing subscription
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.basic_plan,
+            status="active",
+            external_id="sub_test123",
+            current_period_start="2024-01-01T00:00:00Z",
+            current_period_end="2024-02-01T00:00:00Z",
+            payment_processor="stripe",
+        )
+
+        # Mock payment processor
+        mock_processor = Mock()
+        mock_processor.update_subscription.return_value = {
+            "id": "sub_test123",
+            "status": "active",
+        }
+        mock_get_processor.return_value = mock_processor
+
+        # Upgrade plan
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/subscriptions/change-plan/", {"plan_slug": self.pro_plan.slug}
+        )
+
+        # Verify plan changed
+        subscription.refresh_from_db()
+        assert subscription.plan == self.pro_plan
+        mock_processor.update_subscription.assert_called_once()
+
+    @patch("wagtail_subscriptions.payments.get_payment_processor")
+    def test_subscription_cancellation(self, mock_get_processor):
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.basic_plan,
+            status="active",
+            external_id="sub_test123",
+            current_period_start="2024-01-01T00:00:00Z",
+            current_period_end="2024-02-01T00:00:00Z",
+            payment_processor="stripe",
+        )
+
+        # Mock payment processor
+        mock_processor = Mock()
+        mock_processor.cancel_subscription.return_value = {
+            "id": "sub_test123",
+            "status": "canceled",
+            "canceled_at": 1640995200,
+            "cancel_at_period_end": False,
+        }
+        mock_get_processor.return_value = mock_processor
+
+        # Cancel subscription
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/subscriptions/cancel/",
+            {"cancel_immediately": "true", "reason": "Testing"},
+        )
+
+        # Verify cancellation
+        subscription.refresh_from_db()
+        assert subscription.status == "canceled"
+        assert subscription.canceled_at is not None
+        mock_processor.cancel_subscription.assert_called_once()
+
+    def test_feature_access_check(self):
+        from wagtail_subscriptions.models import Module, Feature, PlanFeature
+
+        # Create feature
+        module = Module.objects.create(name="Test Module", slug="test")
+        feature = Feature.objects.create(
+            module=module,
+            name="Test Feature",
+            slug="test-feature",
+            feature_type="binary",
+        )
+
+        # Create subscription with feature
+        subscription = Subscription.objects.create(
+            user=self.user,
+            plan=self.basic_plan,
+            status="active",
+            external_id="sub_test123",
+            current_period_start="2024-01-01T00:00:00Z",
+            current_period_end="2024-02-01T00:00:00Z",
+        )
+
+        # Add feature to plan
+        PlanFeature.objects.create(plan=self.basic_plan, feature=feature, is_included=True)
+
+        # Test feature access
+        assert subscription.has_feature_access("test-feature") == True
+        assert subscription.has_feature_access("nonexistent-feature") == False

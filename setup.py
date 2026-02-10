@@ -1,20 +1,26 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+try:
+    with open("README.md", "r", encoding="utf-8") as fh:
+        long_description = fh.read()
+except FileNotFoundError:
+    long_description = "A comprehensive subscription management system for Wagtail CMS"
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+try:
+    with open("requirements.txt", "r", encoding="utf-8") as fh:
+        requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+except FileNotFoundError:
+    requirements = ["Django>=3.2,<5.0", "wagtail>=4.0,<6.0", "python-dateutil>=2.8.0", "stripe>=5.0.0"]
 
 setup(
     name="wagtail-subscriptions",
     version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Wagtail Subscriptions Team",
+    author_email="contact@wagtail-subscriptions.org",
     description="A comprehensive subscription management system for Wagtail CMS",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/wagtail-subscriptions",
+    url="https://github.com/wagtail-subscriptions/wagtail-subscriptions",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -46,8 +52,8 @@ setup(
     zip_safe=False,
     keywords="wagtail django subscription billing saas payment",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/wagtail-subscriptions/issues",
-        "Source": "https://github.com/yourusername/wagtail-subscriptions",
+        "Bug Reports": "https://github.com/wagtail-subscriptions/wagtail-subscriptions/issues",
+        "Source": "https://github.com/wagtail-subscriptions/wagtail-subscriptions",
         "Documentation": "https://wagtail-subscriptions.readthedocs.io/",
     },
 )
