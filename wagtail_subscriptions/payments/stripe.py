@@ -14,19 +14,31 @@ class StripePaymentProcessor(BasePaymentProcessor):
         stripe.api_key = self.config.get("secret_key")
         self.webhook_secret = self.config.get("webhook_secret")
 
-    def create_customer(self, user, **kwargs) -> str:
-        """Create a Stripe customer"""
-        customer_data = {
-            "email": user.email,
-            "name": user.get_full_name() or user.username,
-            "metadata": {
-                "user_id": str(user.id),
-            },
-        }
+    def create_customer(self, user_or_email, **kwargs) -> Dict[str, Any]:
+        """Create a Stripe customer
+        
+        Args:
+            user_or_email: User object or email string
+        """
+        if isinstance(user_or_email, str):
+            # Email string provided
+            customer_data = {
+                "email": user_or_email,
+                "metadata": kwargs.get("metadata", {}),
+            }
+        else:
+            # User object provided
+            customer_data = {
+                "email": user_or_email.email,
+                "name": user_or_email.get_full_name() or user_or_email.username,
+                "metadata": {
+                    "user_id": str(user_or_email.id),
+                },
+            }
         customer_data.update(kwargs)
 
         customer = stripe.Customer.create(**customer_data)
-        return customer.id
+        return {"id": customer.id, "email": customer.email}
 
     def create_subscription(self, customer_id: str, plan_id: str, **kwargs) -> Dict[str, Any]:
         """Create a Stripe subscription"""

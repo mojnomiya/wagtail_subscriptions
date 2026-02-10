@@ -20,9 +20,9 @@ class TestStripePaymentProcessor:
         mock_customer.id = "cus_test123"
         mock_create.return_value = mock_customer
 
-        customer_id = self.processor.create_customer("test@example.com", "Test User")
+        result = self.processor.create_customer("test@example.com")
 
-        assert customer_id == "cus_test123"
+        assert result["id"] == "cus_test123"
         mock_create.assert_called_once()
 
     @patch("stripe.Subscription.create")
