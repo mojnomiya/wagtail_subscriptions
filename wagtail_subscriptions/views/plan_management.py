@@ -1,11 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import View
 
-from ..models import Subscription, SubscriptionPlan
+from ..models import SubscriptionPlan
 from ..payments import get_payment_processor
 from ..permissions.mixins import SubscriptionRequiredMixin
 from ..utils import calculate_proration

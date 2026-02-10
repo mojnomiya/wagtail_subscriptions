@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.utils import timezone
 
-from ..models import Customer, Invoice, Subscription
+from ..models import Invoice, Subscription
 
 
 class InvoiceService:

@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.utils.translation import gettext as _
 
 from wagtail_subscriptions.models import SubscriptionPlan
 from wagtail_subscriptions.payments import get_payment_processor
@@ -28,7 +27,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Syncing plans with {processor_name}...")
 
         try:
-            processor = get_payment_processor(processor_name)
+            get_payment_processor(processor_name)
             plans = SubscriptionPlan.objects.filter(is_active=True)
 
             for plan in plans:

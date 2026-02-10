@@ -5,7 +5,7 @@ class TenantSubscriptionManager:
     def is_multi_tenant():
         """Auto-detect if running in multi-tenant mode"""
         try:
-            import django_tenants
+            pass
 
             return True
         except ImportError:
@@ -34,11 +34,11 @@ class TenantSubscriptionManager:
             return False
 
         try:
-            plan_feature = plan.plan_features.get(
+            _ = plan.plan_features.get(
                 feature__slug=feature_slug, feature__is_active=True, is_included=True
             )
             return True
-        except:
+        except Exception:
             return False
 
     @staticmethod
@@ -53,7 +53,7 @@ class TenantSubscriptionManager:
                 feature__slug=feature_slug, feature__is_active=True, is_included=True
             )
             return plan_feature.effective_quota
-        except:
+        except Exception:
             return 0
 
     @staticmethod

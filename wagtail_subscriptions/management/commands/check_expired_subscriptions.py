@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.utils.translation import gettext as _
 
 from wagtail_subscriptions.models import Subscription
 
@@ -39,4 +38,4 @@ class Command(BaseCommand):
             updated_subs = expired_subscriptions.update(status="past_due")
             self.stdout.write(f"Updated {updated_subs} expired subscriptions")
 
-            self.stdout.write(self.style.SUCCESS(f"Successfully processed expired subscriptions"))
+            self.stdout.write(self.style.SUCCESS("Successfully processed expired subscriptions"))

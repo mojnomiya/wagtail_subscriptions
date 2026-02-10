@@ -111,7 +111,7 @@ class PaddlePaymentProcessor(BasePaymentProcessor):
         if "prorate" in kwargs:
             data["prorate"] = kwargs["prorate"]
 
-        result = self._make_request("2.0/subscription/users/update", data)
+        self._make_request("2.0/subscription/users/update", data)
 
         return {
             "id": subscription_id,

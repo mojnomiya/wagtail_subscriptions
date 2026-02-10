@@ -1,11 +1,8 @@
-import os
-from datetime import timedelta
 from decimal import Decimal
 
 from django.utils import timezone
-from django.utils._os import safe_join
 
-from .models import Subscription, UsageRecord
+from .models import UsageRecord
 
 
 def track_feature_usage(subscription, feature_slug, count=1):
@@ -25,7 +22,7 @@ def track_feature_usage(subscription, feature_slug, count=1):
         ).feature
 
         # Get current billing period
-        now = timezone.now()
+        timezone.now()
         period_start = subscription.current_period_start
         period_end = subscription.current_period_end
 

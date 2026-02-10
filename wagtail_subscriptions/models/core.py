@@ -1,4 +1,3 @@
-from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -119,7 +118,7 @@ class Subscription(models.Model):
     def has_feature_access(self, feature_slug):
         """Check if subscription has access to a specific feature"""
         try:
-            plan_feature = self.plan.plan_features.get(
+            _ = self.plan.plan_features.get(
                 feature__slug=feature_slug, feature__is_active=True, is_included=True
             )
             return True

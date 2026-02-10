@@ -1,4 +1,3 @@
-import json
 
 from django.http import HttpResponse
 from django.utils import timezone
@@ -45,7 +44,7 @@ class StripeWebhookView(View):
 
             return HttpResponse(status=200)
 
-        except ValueError as e:
+        except ValueError:
             return HttpResponse(status=400)
         except Exception as e:
             # Log error and mark webhook as failed
@@ -101,12 +100,10 @@ class StripeWebhookView(View):
     def handle_payment_succeeded(self, invoice_data):
         """Handle successful payment"""
         # Update subscription status if needed
-        pass
 
     def handle_payment_failed(self, invoice_data):
         """Handle failed payment"""
         # Update subscription status and notify customer
-        pass
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -142,7 +139,7 @@ class PaddleWebhookView(View):
 
             return HttpResponse(status=200)
 
-        except Exception as e:
+        except Exception:
             return HttpResponse(status=400)
 
     def process_paddle_event(self, event_data):
@@ -206,7 +203,7 @@ class PayPalWebhookView(View):
 
             return HttpResponse(status=200)
 
-        except Exception as e:
+        except Exception:
             return HttpResponse(status=400)
 
     def process_paypal_event(self, event_data):

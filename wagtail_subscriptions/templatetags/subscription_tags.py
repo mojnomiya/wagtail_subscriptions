@@ -1,5 +1,4 @@
 from django import template
-from django.template.loader import render_to_string
 
 from ..models import SubscriptionPlan
 from ..permissions.tenant_manager import TenantSubscriptionManager

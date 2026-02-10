@@ -24,4 +24,3 @@ def update_subscription_status(sender, instance, **kwargs):
     """Update subscription status based on dates and external data"""
     # This would contain logic to sync with payment processor
     # and update status based on current date vs. trial_end, etc.
-    pass

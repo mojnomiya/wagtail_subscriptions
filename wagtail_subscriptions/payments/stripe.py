@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 import stripe
-from django.conf import settings
 
 from .base import BasePaymentProcessor
 
@@ -16,7 +15,7 @@ class StripePaymentProcessor(BasePaymentProcessor):
 
     def create_customer(self, user_or_email, **kwargs) -> Dict[str, Any]:
         """Create a Stripe customer
-        
+
         Args:
             user_or_email: User object or email string
         """

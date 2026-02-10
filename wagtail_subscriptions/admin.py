@@ -1,5 +1,5 @@
 from django.contrib import admin
-from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
+from wagtail.contrib.modeladmin.options import ModelAdmin
 from wagtail.snippets.models import register_snippet
 
 from .models import (

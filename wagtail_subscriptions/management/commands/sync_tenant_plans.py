@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             # Try to import django_tenants
-            import django_tenants
+            pass
         except ImportError:
             self.stdout.write(
                 self.style.WARNING("django_tenants not installed. Skipping tenant sync.")

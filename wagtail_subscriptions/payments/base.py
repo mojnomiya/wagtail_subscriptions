@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from django.conf import settings
 
@@ -14,49 +14,40 @@ class BasePaymentProcessor(ABC):
     @abstractmethod
     def setup(self):
         """Initialize the payment processor with configuration"""
-        pass
 
     @abstractmethod
     def create_customer(self, user, **kwargs) -> str:
         """Create a customer in the payment processor and return external ID"""
-        pass
 
     @abstractmethod
     def create_subscription(self, customer_id: str, plan_id: str, **kwargs) -> Dict[str, Any]:
         """Create a subscription and return subscription data"""
-        pass
 
     @abstractmethod
     def cancel_subscription(self, subscription_id: str, **kwargs) -> Dict[str, Any]:
         """Cancel a subscription"""
-        pass
 
     @abstractmethod
     def update_subscription(self, subscription_id: str, **kwargs) -> Dict[str, Any]:
         """Update a subscription (change plan, etc.)"""
-        pass
 
     @abstractmethod
     def get_subscription(self, subscription_id: str) -> Dict[str, Any]:
         """Retrieve subscription details"""
-        pass
 
     @abstractmethod
     def process_webhook(self, payload: bytes, signature: str) -> Dict[str, Any]:
         """Process webhook payload and return event data"""
-        pass
 
     @abstractmethod
     def create_payment_method(self, customer_id: str, payment_method_data: Dict[str, Any]) -> str:
         """Create a payment method and return external ID"""
-        pass
 
     @abstractmethod
     def charge_customer(
         self, customer_id: str, amount: float, currency: str = "USD", **kwargs
     ) -> Dict[str, Any]:
         """Charge a customer and return payment data"""
-        pass
 
 
 # Payment processor registry

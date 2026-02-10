@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db.models import Avg, Count, Sum
 from django.utils import timezone
 
-from .models import Payment, Subscription, UsageRecord
+from .models import Subscription, UsageRecord
 
 
 class SubscriptionAnalytics:

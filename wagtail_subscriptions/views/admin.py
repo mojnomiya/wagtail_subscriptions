@@ -1,9 +1,7 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.decorators import method_decorator
+from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 
 from ..analytics import SubscriptionAnalytics
 from ..models import Customer, Feature, Module, Subscription, SubscriptionPlan
@@ -17,7 +15,7 @@ class SubscriptionDashboardView(AdminSubscriptionMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Enhanced analytics
-        from datetime import datetime, timedelta
+        from datetime import timedelta
 
         from django.db.models import Count, Sum
         from django.utils import timezone
@@ -188,7 +186,7 @@ class CustomersManagementView(AdminSubscriptionMixin, TemplateView):
                         description=f"Bulk canceled subscription for {customer.user.email}",
                         request=self.request,
                     )
-            except Exception as e:
+            except Exception:
                 continue
 
         # Log bulk action
