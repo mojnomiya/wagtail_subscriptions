@@ -45,7 +45,7 @@ class TestSubscriptionRequired:
         middleware.process_request(request)
         request.session.save()
 
-        setattr(request, '_messages', FallbackStorage(request))
+        setattr(request, "_messages", FallbackStorage(request))
 
         response = test_view(request)
         assert response.status_code == 302  # Redirect to pricing

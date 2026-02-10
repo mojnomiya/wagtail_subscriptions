@@ -58,6 +58,7 @@ class TestStripePaymentProcessor:
     @patch("stripe.Subscription.modify")
     def test_cancel_subscription_error_handling(self, mock_modify):
         import stripe
+
         mock_modify.side_effect = stripe.error.StripeError("Test error")
 
         with pytest.raises(Exception):  # Stripe errors may not raise ValueError

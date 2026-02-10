@@ -1,4 +1,3 @@
-
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
