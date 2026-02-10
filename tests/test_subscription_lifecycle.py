@@ -24,8 +24,9 @@ class TestSubscriptionLifecycle(TestCase):
 
     @patch("wagtail_subscriptions.payments.get_payment_processor")
     def test_subscription_creation(self, mock_get_processor):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
 
         # Mock payment processor
         mock_processor = Mock()
@@ -57,8 +58,9 @@ class TestSubscriptionLifecycle(TestCase):
         assert subscription.status == "active"
 
     def test_duplicate_subscription_prevention(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
 
         now = timezone.now()
         # Create existing subscription
@@ -81,8 +83,9 @@ class TestSubscriptionLifecycle(TestCase):
 
     @patch("wagtail_subscriptions.payments.get_payment_processor")
     def test_plan_upgrade(self, mock_get_processor):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
 
         now = timezone.now()
         # Create existing subscription
@@ -114,8 +117,9 @@ class TestSubscriptionLifecycle(TestCase):
 
     @patch("wagtail_subscriptions.payments.get_payment_processor")
     def test_subscription_cancellation(self, mock_get_processor):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
 
         now = timezone.now()
         # Create subscription
@@ -150,8 +154,10 @@ class TestSubscriptionLifecycle(TestCase):
         assert subscription.canceled_at is not None
 
     def test_feature_access_check(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+
         from wagtail_subscriptions.models import Feature, Module, PlanFeature
 
         now = timezone.now()

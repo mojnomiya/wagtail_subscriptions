@@ -43,8 +43,9 @@ def plan():
 
 @pytest.fixture
 def subscription(user, plan):
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
 
     now = timezone.now()
     return Subscription.objects.create(
