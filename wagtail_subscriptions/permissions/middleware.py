@@ -1,4 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
+
 from ..models import Subscription
 
 

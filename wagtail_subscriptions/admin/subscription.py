@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from ..models import Subscription, Customer, Invoice, Payment
+
+from ..models import Customer, Invoice, Payment, Subscription
 
 
 @admin.register(Subscription)

@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView
-from ..models import SubscriptionPlan, Module
+
+from ..models import Module, SubscriptionPlan
 
 
 class PricingView(TemplateView):

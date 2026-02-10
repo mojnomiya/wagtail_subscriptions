@@ -1,8 +1,10 @@
-from decimal import Decimal
-from django.db.models import Count, Sum, Avg
-from django.utils import timezone
 from datetime import timedelta
-from .models import Subscription, Payment, UsageRecord
+from decimal import Decimal
+
+from django.db.models import Avg, Count, Sum
+from django.utils import timezone
+
+from .models import Payment, Subscription, UsageRecord
 
 
 class SubscriptionAnalytics:

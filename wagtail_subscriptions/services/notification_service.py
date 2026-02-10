@@ -1,8 +1,10 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.conf import settings
 from django.utils import timezone
-from datetime import timedelta
+
 from ..models import Subscription
 
 
@@ -98,8 +100,9 @@ class NotificationService:
     @staticmethod
     def check_trial_endings():
         """Check for trials ending soon and send notifications"""
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
 
         # Find trials ending in 3 days
         three_days_from_now = timezone.now() + timedelta(days=3)

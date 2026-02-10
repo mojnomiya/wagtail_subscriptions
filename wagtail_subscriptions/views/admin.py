@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView, View
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from ..models import SubscriptionPlan, Module, Feature, Subscription, Customer
+from django.views.generic import TemplateView, View
+
 from ..analytics import SubscriptionAnalytics
+from ..models import Customer, Feature, Module, Subscription, SubscriptionPlan
 from ..permissions.mixins import AdminSubscriptionMixin
 
 
@@ -17,8 +18,9 @@ class SubscriptionDashboardView(AdminSubscriptionMixin, TemplateView):
 
         # Enhanced analytics
         from datetime import datetime, timedelta
-        from django.utils import timezone
+
         from django.db.models import Count, Sum
+        from django.utils import timezone
 
         now = timezone.now()
         last_month = now - timedelta(days=30)
@@ -159,8 +161,8 @@ class CustomersManagementView(AdminSubscriptionMixin, TemplateView):
         return redirect("wagtail_subscriptions_admin:customers")
 
     def _bulk_cancel_subscriptions(self, customer_ids):
-        from ..payments import get_payment_processor
         from ..models.audit import AuditLog
+        from ..payments import get_payment_processor
 
         canceled_count = 0
         for customer_id in customer_ids:
@@ -206,7 +208,9 @@ class CustomersManagementView(AdminSubscriptionMixin, TemplateView):
 
     def _export_customers(self, customer_ids):
         import csv
+
         from django.http import HttpResponse
+
         from ..models.audit import AuditLog
 
         response = HttpResponse(content_type="text/csv")
@@ -248,6 +252,7 @@ class SettingsView(AdminSubscriptionMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from django.conf import settings
+
         from ..forms import PaymentProcessorConfigForm
 
         context["payment_processors"] = getattr(settings, "WAGTAIL_SUBSCRIPTIONS", {}).get(

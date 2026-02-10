@@ -1,3 +1,3 @@
-from .decorators import subscription_required, feature_required
+from .decorators import feature_required, subscription_required
 from .middleware import SubscriptionMiddleware
-from .mixins import SubscriptionRequiredMixin, FeatureRequiredMixin
+from .mixins import FeatureRequiredMixin, SubscriptionRequiredMixin

@@ -1,16 +1,17 @@
 from django.contrib import admin
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 from wagtail.snippets.models import register_snippet
+
 from .models import (
-    SubscriptionPlan,
-    Module,
+    Customer,
     Feature,
+    Module,
     PlanFeature,
     Subscription,
-    Customer,
+    SubscriptionPlan,
     UsageRecord,
 )
-from .models.permissions import SubscriptionPermission, SubscriptionGroup
+from .models.permissions import SubscriptionGroup, SubscriptionPermission
 
 
 @register_snippet

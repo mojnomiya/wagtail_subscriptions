@@ -1,8 +1,8 @@
-from django.urls import reverse, include, path
+from django.urls import include, path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from wagtail import hooks
-from wagtail.admin.menu import MenuItem, Menu, SubmenuMenuItem
+from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
 from wagtail.admin.site_summary import SummaryItem
 
 

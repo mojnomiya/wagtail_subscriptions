@@ -1,11 +1,12 @@
 import pytest
 from django.contrib.auth import get_user_model
+
 from wagtail_subscriptions.models import (
-    SubscriptionPlan,
-    Module,
-    Feature,
-    Subscription,
     Customer,
+    Feature,
+    Module,
+    Subscription,
+    SubscriptionPlan,
 )
 
 User = get_user_model()

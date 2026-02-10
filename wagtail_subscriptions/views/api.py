@@ -1,8 +1,9 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views.generic import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from ..permissions.mixins import SubscriptionRequiredMixin
+
 from ..models import SubscriptionPlan
+from ..permissions.mixins import SubscriptionRequiredMixin
 
 
 class SubscriptionAPIView(SubscriptionRequiredMixin, View):

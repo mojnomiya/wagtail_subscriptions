@@ -1,6 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
-from wagtail_subscriptions.models import SubscriptionPlan, Subscription
+
+from wagtail_subscriptions.models import Subscription, SubscriptionPlan
 
 
 @pytest.mark.django_db

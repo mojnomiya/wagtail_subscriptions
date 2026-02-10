@@ -1,13 +1,15 @@
+from unittest.mock import Mock, patch
+
 import pytest
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from unittest.mock import patch, Mock
-from wagtail_subscriptions.models import SubscriptionPlan, Subscription, Customer
-from wagtail_subscriptions.views.subscription import SubscribeView
+from django.test import TestCase
+
+from wagtail_subscriptions.models import Customer, Subscription, SubscriptionPlan
 from wagtail_subscriptions.views.plan_management import (
-    ChangePlanView,
     CancelSubscriptionView,
+    ChangePlanView,
 )
+from wagtail_subscriptions.views.subscription import SubscribeView
 
 User = get_user_model()
 
@@ -140,7 +142,7 @@ class TestSubscriptionLifecycle(TestCase):
         mock_processor.cancel_subscription.assert_called_once()
 
     def test_feature_access_check(self):
-        from wagtail_subscriptions.models import Module, Feature, PlanFeature
+        from wagtail_subscriptions.models import Feature, Module, PlanFeature
 
         # Create feature
         module = Module.objects.create(name="Test Module", slug="test")

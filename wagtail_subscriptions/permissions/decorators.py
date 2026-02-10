@@ -1,8 +1,10 @@
 from functools import wraps
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+
 from ..models import Subscription
 from .tenant_manager import TenantSubscriptionManager
 

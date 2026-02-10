@@ -1,12 +1,13 @@
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand
+
 from wagtail_subscriptions.models import (
-    SubscriptionPlan,
-    Module,
-    Feature,
-    Subscription,
     Customer,
+    Feature,
+    Module,
+    Subscription,
+    SubscriptionPlan,
 )
 
 

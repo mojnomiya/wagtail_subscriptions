@@ -1,10 +1,11 @@
 from django.urls import path
+
 from .views.admin import (
-    SubscriptionDashboardView,
-    PlansManagementView,
-    FeaturesManagementView,
     CustomersManagementView,
+    FeaturesManagementView,
+    PlansManagementView,
     SettingsView,
+    SubscriptionDashboardView,
 )
 from .views.plan_features import PlanFeatureManagementView
 

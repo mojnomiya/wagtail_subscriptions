@@ -1,10 +1,11 @@
-from django.views.generic import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from ..models import SubscriptionPlan, Subscription
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import View
+
+from ..models import Subscription, SubscriptionPlan
 from ..payments import get_payment_processor
 from ..permissions.mixins import SubscriptionRequiredMixin
 from ..utils import calculate_proration
@@ -121,8 +122,9 @@ class CancelSubscriptionView(SubscriptionRequiredMixin, View):
             )
 
             # Update local subscription
-            from django.utils import timezone
             from datetime import datetime
+
+            from django.utils import timezone
 
             self.subscription.status = "canceled"
             if cancel_immediately:
@@ -180,8 +182,9 @@ class ReactivateSubscriptionView(SubscriptionRequiredMixin, View):
             )
 
             # Update local subscription
-            from django.utils import timezone
             from datetime import datetime
+
+            from django.utils import timezone
 
             self.subscription.status = subscription_data["status"]
             self.subscription.external_id = subscription_data["id"]

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from ..models import Module, Feature, PlanFeature, UsageRecord
+
+from ..models import Feature, Module, PlanFeature, UsageRecord
 
 
 @admin.register(Module)

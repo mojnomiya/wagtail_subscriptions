@@ -1,12 +1,13 @@
 import pytest
-from django.test import RequestFactory
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+from django.test import RequestFactory
+
+from wagtail_subscriptions.models import Feature, Module, Subscription, SubscriptionPlan
 from wagtail_subscriptions.permissions.decorators import (
-    subscription_required,
     feature_required,
+    subscription_required,
 )
-from wagtail_subscriptions.models import SubscriptionPlan, Subscription, Module, Feature
 
 User = get_user_model()
 

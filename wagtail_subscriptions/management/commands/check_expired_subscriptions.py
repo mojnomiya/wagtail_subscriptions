@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.translation import gettext as _
+
 from wagtail_subscriptions.models import Subscription
 
 

@@ -1,9 +1,10 @@
-from django.views.generic import TemplateView, View
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
-from ..models import SubscriptionPlan, Subscription, Customer
+from django.views.generic import TemplateView, View
+
+from ..models import Customer, Subscription, SubscriptionPlan
 from ..payments import get_payment_processor
 from ..permissions.mixins import SubscriptionRequiredMixin
 
@@ -74,8 +75,9 @@ class SubscribeView(LoginRequiredMixin, TemplateView):
             )
 
             # Create local subscription record
-            from django.utils import timezone
             from datetime import datetime
+
+            from django.utils import timezone
 
             subscription = Subscription.objects.create(
                 user=request.user,

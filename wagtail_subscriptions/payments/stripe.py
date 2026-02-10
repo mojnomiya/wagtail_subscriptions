@@ -1,6 +1,8 @@
+from typing import Any, Dict
+
 import stripe
-from typing import Dict, Any
 from django.conf import settings
+
 from .base import BasePaymentProcessor
 
 

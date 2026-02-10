@@ -1,7 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
+
 from . import views
+from .views import plan_management, subscription, webhooks
 from .views.api import PricingPlansAPIView
-from .views import subscription, plan_management, webhooks
 
 app_name = "wagtail_subscriptions"
 

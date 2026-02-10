@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from wagtail_subscriptions.models import SubscriptionPlan, Module, Feature, PlanFeature
+
+from wagtail_subscriptions.models import Feature, Module, PlanFeature, SubscriptionPlan
 
 
 class Command(BaseCommand):

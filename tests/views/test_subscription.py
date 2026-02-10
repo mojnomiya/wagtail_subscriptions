@@ -1,10 +1,12 @@
+from unittest.mock import Mock, patch
+
 import pytest
-from django.test import RequestFactory
 from django.contrib.auth import get_user_model
+from django.test import RequestFactory
 from django.urls import reverse
-from unittest.mock import patch, Mock
-from wagtail_subscriptions.views.subscription import SubscribeView, CustomerPortalView
-from wagtail_subscriptions.models import SubscriptionPlan, Customer
+
+from wagtail_subscriptions.models import Customer, SubscriptionPlan
+from wagtail_subscriptions.views.subscription import CustomerPortalView, SubscribeView
 
 User = get_user_model()
 
