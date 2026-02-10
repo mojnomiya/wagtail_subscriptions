@@ -285,15 +285,21 @@ class Migration(migrations.Migration):
                 "ordering": ["-created_at"],
             },
         ),
-        migrations.RenameIndex(
+        migrations.RemoveIndex(
             model_name="subscription",
-            new_name="wagtail_sub_user_id_d55194_idx",
-            old_name="wagtail_sub_user_id_b8e5c7_idx",
+            name="wagtail_sub_user_id_b8e5c7_idx",
         ),
-        migrations.RenameIndex(
+        migrations.AddIndex(
             model_name="subscription",
-            new_name="wagtail_sub_externa_101b15_idx",
-            old_name="wagtail_sub_externa_4b8c8a_idx",
+            index=models.Index(fields=["user"], name="wagtail_sub_user_id_d55194_idx"),
+        ),
+        migrations.RemoveIndex(
+            model_name="subscription",
+            name="wagtail_sub_externa_4b8c8a_idx",
+        ),
+        migrations.AddIndex(
+            model_name="subscription",
+            index=models.Index(fields=["external_id"], name="wagtail_sub_externa_101b15_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="webhookevent",
