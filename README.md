@@ -1,5 +1,7 @@
 # Wagtail Subscriptions
 
+![Wagtail Subscriptions Banner](wagtail_subscription.png)
+
 [![PyPI version](https://badge.fury.io/py/wagtail-subscriptions.svg)](https://badge.fury.io/py/wagtail-subscriptions)
 [![Documentation Status](https://readthedocs.org/projects/wagtail-subscriptions/badge/?version=latest)](https://wagtail-subscriptions.readthedocs.io/en/latest/?badge=latest)
 [![Python Version](https://img.shields.io/pypi/pyversions/wagtail-subscriptions.svg)](https://pypi.org/project/wagtail-subscriptions/)
