@@ -5,8 +5,9 @@ class TenantSubscriptionManager:
     def is_multi_tenant():
         """Auto-detect if running in multi-tenant mode"""
         try:
-            pass
+            from django_tenants.models import TenantMixin
 
+            # If TenantMixin is available, we're in multi-tenant mode
             return True
         except ImportError:
             return False

@@ -1,0 +1,16 @@
+Payment Failed
+
+Hello {{ customer.get_full_name() or customer.username }},
+
+We're sorry to inform you that your payment for the {{ plan.name }} plan failed.
+
+Amount: ${{ amount }}
+Date: {{ payment_date }}
+
+Please update your payment method or contact support if you have any questions.
+
+Update Payment Method: {{ portal_url }}
+
+---
+
+© {{ current_year }} Your Company. All rights reserved.

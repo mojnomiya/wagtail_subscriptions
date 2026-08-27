@@ -14,9 +14,12 @@ class PayPalPaymentProcessor(BasePaymentProcessor):
         self.client_id = self.config.get("client_id")
         self.client_secret = self.config.get("client_secret")
         self.mode = self.config.get("mode", "sandbox")
+        self.validate_config(["client_id", "client_secret"])
 
-        if not self.client_id or not self.client_secret:
-            raise ValueError("PayPal client_id and client_secret are required")
+        self.base_url = (
+            "https://api.sandbox.paypal.com" if self.mode == "sandbox" else "https://api.paypal.com"
+        )
+        self.access_token = self._get_access_token()
 
         self.base_url = (
             "https://api.sandbox.paypal.com" if self.mode == "sandbox" else "https://api.paypal.com"

@@ -1,0 +1,15 @@
+Subscription Canceled
+
+Hello {{ customer.get_full_name() or customer.username }},
+
+Your subscription to the {{ plan.name }} plan has been canceled.
+
+Canceled on: {{ canceled_date }}
+
+If you wish to continue using our services, you can resubscribe at any time.
+
+Resubscribe: {{ portal_url }}
+
+---
+
+© {{ current_year }} Your Company. All rights reserved.

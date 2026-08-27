@@ -13,11 +13,23 @@ class Command(BaseCommand):
             type=str,
             help="Tenant model path (e.g., myapp.Client). If not provided, will auto-detect.",
         )
+        parser.add_argument(
+            "--default-plan",
+            type=str,
+            help="Default plan slug to assign to tenants without plans. If not provided, uses first active plan.",
+        )
+        parser.add_argument(
+            "--match-by",
+            type=str,
+            choices=["plan_type", "domain"],
+            default="plan_type",
+            help="Field to match tenants to plans by (default: plan_type)",
+        )
 
     def handle(self, *args, **options):
         try:
             # Try to import django_tenants
-            pass
+            from django_tenants.models import TenantMixin
         except ImportError:
             self.stdout.write(
                 self.style.WARNING("django_tenants not installed. Skipping tenant sync.")
@@ -56,35 +68,50 @@ class Command(BaseCommand):
             )
             return
 
-        # Get default plan (first active plan)
-        default_plan = SubscriptionPlan.objects.filter(is_active=True).first()
-
-        if not default_plan:
-            self.stdout.write(
-                self.style.ERROR("No active subscription plans found. Create plans first.")
-            )
-            return
+        # Get default plan
+        default_plan_slug = options.get("default_plan")
+        if default_plan_slug:
+            try:
+                default_plan = SubscriptionPlan.objects.get(slug=default_plan_slug, is_active=True)
+            except SubscriptionPlan.DoesNotExist:
+                self.stdout.write(
+                    self.style.ERROR(f"Default plan '{default_plan_slug}' not found or not active.")
+                )
+                return
+        else:
+            default_plan = SubscriptionPlan.objects.filter(is_active=True).first()
+            if not default_plan:
+                self.stdout.write(
+                    self.style.ERROR("No active subscription plans found. Create plans first.")
+                )
+                return
 
         # Assign default plan to tenants without plans
         updated_count = 0
+        skipped_count = 0
         for tenant in tenants_without_plans:
-            # Try to match by legacy plan_type if available
-            if hasattr(tenant, "plan_type") and tenant.plan_type:
+            # Try to match by specified field
+            match_field = options.get("match_by")
+            matched = False
+
+            if match_field == "plan_type" and hasattr(tenant, "plan_type") and tenant.plan_type:
                 try:
                     plan = SubscriptionPlan.objects.get(slug=tenant.plan_type)
                     tenant.subscription_plan = plan
                     tenant.save()
                     updated_count += 1
-                    self.stdout.write(f"Assigned {plan.name} to {tenant.name}")
-                    continue
+                    self.stdout.write(f"Assigned {plan.name} to {tenant.name} (matched by plan_type)")
+                    matched = True
                 except SubscriptionPlan.DoesNotExist:
                     pass
 
-            # Fallback to default plan
-            tenant.subscription_plan = default_plan
-            tenant.save()
-            updated_count += 1
-            self.stdout.write(f"Assigned {default_plan.name} to {tenant.name} (default)")
+            if not matched:
+                tenant.subscription_plan = default_plan
+                tenant.save()
+                updated_count += 1
+                self.stdout.write(
+                    f"Assigned {default_plan.name} to {tenant.name} (default plan)"
+                )
 
         self.stdout.write(self.style.SUCCESS(f"Successfully updated {updated_count} tenants."))
 

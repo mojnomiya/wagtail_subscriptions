@@ -2,7 +2,13 @@ from django.urls import include, path
 
 from . import views
 from .views import plan_management, subscription, webhooks
-from .views.api import PricingPlansAPIView
+from .views.api import (
+    FeatureUsageAPIView,
+    PricingPlansAPIView,
+    SubscriptionAPIView,
+    SubscriptionStatsAPIView,
+    TrialStatsAPIView,
+)
 
 app_name = "wagtail_subscriptions"
 
@@ -62,11 +68,13 @@ urlpatterns = [
             [
                 path(
                     "subscription/",
-                    views.SubscriptionAPIView.as_view(),
+                    SubscriptionAPIView.as_view(),
                     name="subscription_api",
                 ),
-                path("analytics/", views.AnalyticsAPIView.as_view(), name="analytics_api"),
+                path("stats/", SubscriptionStatsAPIView.as_view(), name="subscription_stats"),
+                path("trial-stats/", TrialStatsAPIView.as_view(), name="trial_stats"),
                 path("plans/", PricingPlansAPIView.as_view(), name="api_plans"),
+                path("feature-usage/", FeatureUsageAPIView.as_view(), name="feature_usage"),
             ]
         ),
     ),

@@ -1,11 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+import time
+from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 
 class BasePaymentProcessor(ABC):
     """Abstract base class for payment processors"""
+
+    # Default retry configuration
+    max_retries: int = 3
+    retry_delay: float = 1.0
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
@@ -48,6 +54,28 @@ class BasePaymentProcessor(ABC):
         self, customer_id: str, amount: float, currency: str = "USD", **kwargs
     ) -> Dict[str, Any]:
         """Charge a customer and return payment data"""
+
+    def _make_request_with_retry(
+        self, request_func, *args, **kwargs
+    ) -> Any:
+        """Execute a request function with retry logic"""
+        last_exception = None
+        for attempt in range(self.max_retries):
+            try:
+                return request_func(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
+                if attempt < self.max_retries - 1:
+                    time.sleep(self.retry_delay * (attempt + 1))
+        raise last_exception
+
+    def validate_config(self, required_keys: list[str]) -> None:
+        """Validate that required configuration keys are present"""
+        missing = [key for key in required_keys if not self.config.get(key)]
+        if missing:
+            raise ImproperlyConfigured(
+                f"Missing required payment processor configuration: {', '.join(missing)}"
+            )
 
 
 # Payment processor registry

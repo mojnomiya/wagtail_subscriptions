@@ -17,9 +17,7 @@ class PaddlePaymentProcessor(BasePaymentProcessor):
         self.vendor_auth_code = self.config.get("vendor_auth_code")
         self.public_key = self.config.get("public_key")
         self.sandbox = self.config.get("sandbox", True)
-
-        if not self.vendor_id or not self.vendor_auth_code:
-            raise ValueError("Paddle vendor_id and vendor_auth_code are required")
+        self.validate_config(["vendor_id", "vendor_auth_code"])
 
         self.base_url = (
             "https://sandbox-vendors.paddle.com/api"

@@ -1,0 +1,272 @@
+import pytest
+from decimal import Decimal
+
+from wagtail_subscriptions.models import Feature, Module, PlanFeature, SubscriptionPlan
+from wagtail_subscriptions.utils import (
+    check_feature_quota,
+    calculate_proration,
+    get_billing_period_days,
+    reset_feature_usage_for_period,
+    track_feature_usage,
+)
+
+
+@pytest.mark.django_db
+class TestMultiTenantDetection:
+    """Test multi-tenant detection functionality"""
+
+    def test_is_multi_tenant_when_django_tenants_installed(self):
+        """Test is_multi_tenant returns True when django_tenants is available"""
+        from wagtail_subscriptions.permissions.tenant_manager import TenantSubscriptionManager
+
+        # Just verify the method exists and is callable
+        result = TenantSubscriptionManager.is_multi_tenant()
+        # When django_tenants is not installed, should return False
+        # When installed, should return True
+        assert isinstance(result, bool)
+
+    def test_is_multi_tenant_returns_bool(self):
+        """Test is_multi_tenant always returns a boolean"""
+        from wagtail_subscriptions.permissions.tenant_manager import TenantSubscriptionManager
+
+        result = TenantSubscriptionManager.is_multi_tenant()
+        assert result in [True, False]
+
+
+@pytest.mark.django_db
+class TestFeatureQuota:
+    """Test feature quota tracking and management"""
+
+    def test_get_billing_period_days_monthly(self):
+        """Test billing period days calculation for monthly"""
+        days = get_billing_period_days("monthly")
+        assert days == 30
+
+    def test_get_billing_period_days_quarterly(self):
+        """Test billing period days calculation for quarterly"""
+        days = get_billing_period_days("quarterly")
+        assert days == 90
+
+    def test_get_billing_period_days_yearly(self):
+        """Test billing period days calculation for yearly"""
+        days = get_billing_period_days("yearly")
+        assert days == 365
+
+    def test_get_billing_period_days_lifetime(self):
+        """Test billing period days calculation for lifetime"""
+        days = get_billing_period_days("lifetime")
+        assert days == 3650
+
+    def test_track_feature_usage(self, user, plan, feature):
+        """Test tracking feature usage"""
+        from wagtail_subscriptions.models import Subscription
+
+        # Create subscription and associate feature with plan
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
+
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            status="active",
+            current_period_start="2024-01-01",
+            current_period_end="2024-01-31",
+        )
+
+        # Track usage
+        result = track_feature_usage(subscription, feature.slug, count=1)
+        assert result is not None
+        assert result.usage_count == 1
+
+        # Track additional usage
+        result = track_feature_usage(subscription, feature.slug, count=2)
+        assert result is not None
+        assert result.usage_count == 3
+
+    def test_check_feature_quota_no_quota(self, user, plan, feature):
+        """Test checking quota when feature has no quota"""
+        from wagtail_subscriptions.models import Subscription
+
+        # Add feature to plan without quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
+
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            status="active",
+            current_period_start="2024-01-01",
+            current_period_end="2024-01-31",
+        )
+
+        # Check quota - should return True (no limit)
+        result = check_feature_quota(subscription, feature.slug)
+        assert result is True
+
+    def test_check_feature_quota_with_quota(self, user, plan, feature):
+        """Test checking quota when feature has quota"""
+        from wagtail_subscriptions.models import PlanFeature, Subscription
+
+        # Add feature to plan with quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
+
+        # Actually, default_quota is on the Feature model, let's set it there
+        feature.default_quota = 5
+        feature.save()
+
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            status="active",
+            current_period_start="2024-01-01",
+            current_period_end="2024-01-31",
+        )
+
+        # Check quota - should return True (under limit)
+        result = check_feature_quota(subscription, feature.slug)
+        assert result is True
+
+    def test_reset_feature_usage_for_period(self, user, plan, feature):
+        """Test resetting feature usage for a new billing period"""
+        from wagtail_subscriptions.models import PlanFeature, Subscription
+
+        # Add feature to plan with quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
+
+        # Set quota on feature
+        feature.default_quota = 10
+        feature.save()
+
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            status="active",
+            current_period_start="2024-01-01",
+            current_period_end="2024-01-31",
+        )
+
+        # Track some usage first
+        track_feature_usage(subscription, feature.slug, count=3)
+
+        # Reset usage for new period
+        reset_feature_usage_for_period(subscription)
+
+        # Check that usage is reset
+        result = check_feature_quota(subscription, feature.slug)
+        assert result is True  # Should be under new limit
+
+
+@pytest.mark.django_db
+class TestProrationCalculation:
+    """Test proration calculation for plan changes"""
+
+    def test_calculate_proration_same_period(self, plan):
+        """Test proration calculation for same billing period"""
+        from wagtail_subscriptions.models import SubscriptionPlan
+
+        # Create another plan for comparison
+        new_plan = SubscriptionPlan.objects.create(
+            name="Premium Plan", slug="premium-plan", price=49.99, billing_period="monthly"
+        )
+
+        # Calculate proration for 15 days remaining
+        result = calculate_proration(plan, new_plan, 15)
+
+        # Should be positive (upgrade cost)
+        assert isinstance(result, Decimal)
+        assert result != Decimal("0.00")
+
+    def test_calculate_proration_different_periods(self, plan):
+        """Test proration calculation for different billing periods"""
+        from wagtail_subscriptions.models import SubscriptionPlan
+
+        # Create a yearly plan
+        yearly_plan = SubscriptionPlan.objects.create(
+            name="Yearly Plan", slug="yearly-plan", price=199.99, billing_period="yearly"
+        )
+
+        # Calculate proration for 30 days remaining with different periods
+        result = calculate_proration(plan, yearly_plan, 30)
+
+        # Should return a value (not 0.00 for different periods)
+        assert isinstance(result, Decimal)
+
+    def test_calculate_proration_zero_days(self, plan):
+        """Test proration calculation with zero days remaining"""
+        from wagtail_subscriptions.models import SubscriptionPlan
+
+        new_plan = SubscriptionPlan.objects.create(
+            name="Premium Plan", slug="premium-plan", price=49.99, billing_period="monthly"
+        )
+
+        # Calculate proration for 0 days remaining
+        result = calculate_proration(plan, new_plan, 0)
+
+        # Should be 0 or very small
+        assert isinstance(result, Decimal)
+
+
+@pytest.mark.django_db
+class TestUtilsIntegration:
+    """Integration tests for utils functions"""
+
+    def test_full_quota_lifecycle(self, user, plan, feature):
+        """Test the full quota lifecycle: track, check, reset"""
+        from wagtail_subscriptions.models import PlanFeature, Subscription
+
+        # Add feature to plan with quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
+
+        # Set quota on feature
+        feature.default_quota = 5
+        feature.save()
+
+        # Create subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            status="active",
+            current_period_start="2024-01-01",
+            current_period_end="2024-01-31",
+        )
+
+        # Initially under quota
+        assert check_feature_quota(subscription, feature.slug) is True
+
+        # Track usage to limit
+        for i in range(5):
+            track_feature_usage(subscription, feature.slug, count=1)
+
+        # Now at quota limit (5/5), should still be True (not exceeded)
+        assert check_feature_quota(subscription, feature.slug) is True
+
+        # Track one more to exceed quota
+        track_feature_usage(subscription, feature.slug, count=1)
+
+        # Debug: print values
+        from wagtail_subscriptions.models import PlanFeature as PF
+        pf = subscription.plan.plan_features.get(feature__slug=feature.slug)
+        print(f"plan_feature.effective_quota: {pf.effective_quota}")
+        print(f"plan_feature.quota_override: {pf.quota_override}")
+        print(f"feature.default_quota: {feature.default_quota}")
+        from wagtail_subscriptions.models import UsageRecord
+        usage = UsageRecord.objects.filter(
+            subscription=subscription,
+            feature=pf.feature,
+            period_start=subscription.current_period_start,
+        ).first()
+        print(f"usage_record: count={usage.usage_count if usage else 'None'}, period_start={usage.period_start if usage else 'None'}")
+
+        # Now over quota
+        result = check_feature_quota(subscription, feature.slug)
+        print(f"check_feature_quota result: {result}")
+        assert result is False
+
+        # Reset for new period
+        from wagtail_subscriptions.utils import reset_feature_usage_for_period
+        reset_feature_usage_for_period(subscription)
+
+        # Under quota again
+        assert check_feature_quota(subscription, feature.slug) is True

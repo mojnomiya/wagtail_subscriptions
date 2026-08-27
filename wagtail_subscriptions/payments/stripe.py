@@ -12,6 +12,7 @@ class StripePaymentProcessor(BasePaymentProcessor):
         """Initialize Stripe with API keys"""
         stripe.api_key = self.config.get("secret_key")
         self.webhook_secret = self.config.get("webhook_secret")
+        self.validate_config(["secret_key", "webhook_secret"])
 
     def create_customer(self, user_or_email, **kwargs) -> Dict[str, Any]:
         """Create a Stripe customer

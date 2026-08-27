@@ -2,7 +2,9 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from ...models import Subscription
+from ...payments import get_payment_processor
 from ...services.notification_service import NotificationService
+from ...utils import reset_feature_usage_for_period
 
 
 class Command(BaseCommand):
@@ -20,6 +22,11 @@ class Command(BaseCommand):
             help="Check for failed payments and send notifications",
         )
         parser.add_argument(
+            "--reset-usages",
+            action="store_true",
+            help="Reset feature usage records for all subscriptions",
+        )
+        parser.add_argument(
             "--cleanup-expired",
             action="store_true",
             help="Clean up expired trial subscriptions",
@@ -34,6 +41,7 @@ class Command(BaseCommand):
         if options["all"]:
             options["check_trials"] = True
             options["check_payments"] = True
+            options["reset_usages"] = True
             options["cleanup_expired"] = True
 
         if options["check_trials"]:
@@ -41,6 +49,9 @@ class Command(BaseCommand):
 
         if options["check_payments"]:
             self.check_failed_payments()
+
+        if options["reset_usages"]:
+            self.reset_all_usages()
 
         if options["cleanup_expired"]:
             self.cleanup_expired_trials()
@@ -70,6 +81,23 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write("No recent payment failures")
+
+    def reset_all_usages(self):
+        """Reset feature usage records for all subscriptions"""
+        self.stdout.write("Resetting feature usage records...")
+
+        from ...models import Subscription
+
+        count = 0
+        for subscription in Subscription.objects.filter(
+            status__in=["active", "trialing"]
+        ):
+            reset_feature_usage_for_period(subscription)
+            count += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Reset usage records for {count} subscriptions")
+        )
 
     def cleanup_expired_trials(self):
         """Clean up expired trial subscriptions"""

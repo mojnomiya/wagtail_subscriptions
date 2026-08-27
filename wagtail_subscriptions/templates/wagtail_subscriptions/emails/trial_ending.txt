@@ -1,0 +1,15 @@
+Your Trial is Ending
+
+Hello {{ customer.get_full_name() or customer.username }},
+
+Your trial period for the {{ plan.name }} plan is ending in {{ days_remaining }} day(s).
+
+To continue enjoying your subscription, please subscribe now before your trial ends.
+
+Don't worry - you won't be charged until after the trial period ends.
+
+Subscribe: {{ portal_url }}
+
+---
+
+© {{ current_year }} Your Company. All rights reserved.
