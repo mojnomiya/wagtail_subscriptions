@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             # Try to import django_tenants
-            from django_tenants.models import TenantMixin
+            import django_tenants  # noqa: F401
         except ImportError:
             self.stdout.write(
                 self.style.WARNING("django_tenants not installed. Skipping tenant sync.")
@@ -88,7 +88,6 @@ class Command(BaseCommand):
 
         # Assign default plan to tenants without plans
         updated_count = 0
-        skipped_count = 0
         for tenant in tenants_without_plans:
             # Try to match by specified field
             match_field = options.get("match_by")

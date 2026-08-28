@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured

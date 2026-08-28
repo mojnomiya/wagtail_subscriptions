@@ -1,7 +1,7 @@
 import pytest
 from decimal import Decimal
 
-from wagtail_subscriptions.models import Feature, Module, PlanFeature, SubscriptionPlan
+from wagtail_subscriptions.models import PlanFeature, SubscriptionPlan
 from wagtail_subscriptions.utils import (
     check_feature_quota,
     calculate_proration,
@@ -170,7 +170,6 @@ class TestProrationCalculation:
 
     def test_calculate_proration_same_period(self, plan):
         """Test proration calculation for same billing period"""
-        from wagtail_subscriptions.models import SubscriptionPlan
 
         # Create another plan for comparison
         new_plan = SubscriptionPlan.objects.create(
@@ -186,7 +185,6 @@ class TestProrationCalculation:
 
     def test_calculate_proration_different_periods(self, plan):
         """Test proration calculation for different billing periods"""
-        from wagtail_subscriptions.models import SubscriptionPlan
 
         # Create a yearly plan
         yearly_plan = SubscriptionPlan.objects.create(
@@ -201,7 +199,6 @@ class TestProrationCalculation:
 
     def test_calculate_proration_zero_days(self, plan):
         """Test proration calculation with zero days remaining"""
-        from wagtail_subscriptions.models import SubscriptionPlan
 
         new_plan = SubscriptionPlan.objects.create(
             name="Premium Plan", slug="premium-plan", price=49.99, billing_period="monthly"

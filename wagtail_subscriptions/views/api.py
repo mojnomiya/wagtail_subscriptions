@@ -1,6 +1,3 @@
-from datetime import timedelta
-from decimal import Decimal
-
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.generic import View
@@ -154,8 +151,6 @@ class TrialStatsAPIView(View):
     def get(self, request, *args, **kwargs):
         """Return trial statistics as JSON"""
         from datetime import timedelta
-
-        from django.db.models import Count
 
         days = int(request.GET.get("days", 30))
         end_date = timezone.now()

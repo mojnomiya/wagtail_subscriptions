@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from ...models import Subscription
-from ...payments import get_payment_processor
 from ...services.notification_service import NotificationService
 from ...utils import reset_feature_usage_for_period
 
