@@ -100,6 +100,7 @@ def reset_feature_usage_for_period(subscription):
 
     period_start = subscription.current_period_start
 
+    # Delete old usage records from previous periods
     UsageRecord.objects.filter(
         subscription=subscription,
         period_start__lt=period_start,
@@ -109,7 +110,7 @@ def reset_feature_usage_for_period(subscription):
     for plan_feature in subscription.plan.plan_features.filter(
         is_included=True, feature__feature_type="quota"
     ):
-        UsageRecord.objects.get_or_create(
+        UsageRecord.objects.update_or_create(
             subscription=subscription,
             feature=plan_feature.feature,
             period_start=period_start,

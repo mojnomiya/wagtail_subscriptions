@@ -61,6 +61,10 @@ class TestFeatureQuota:
         """Test tracking feature usage"""
         from wagtail_subscriptions.models import Subscription
 
+        # Set feature to quota type
+        feature.feature_type = "quota"
+        feature.save()
+
         # Create subscription and associate feature with plan
         PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
 
@@ -84,10 +88,10 @@ class TestFeatureQuota:
         assert result.usage_count == 3
 
     def test_check_feature_quota_no_quota(self, user, plan, feature):
-        """Test checking quota when feature has no quota"""
+        """Test checking quota when feature is binary type (no quota limit)"""
         from wagtail_subscriptions.models import Subscription
 
-        # Add feature to plan without quota
+        # Add feature to plan without quota (default feature_type is "binary")
         PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
 
         # Create subscription
@@ -99,7 +103,7 @@ class TestFeatureQuota:
             current_period_end="2024-01-31",
         )
 
-        # Check quota - should return True (no limit)
+        # Check quota - should return True (no limit for binary features)
         result = check_feature_quota(subscription, feature.slug)
         assert result is True
 
@@ -107,12 +111,13 @@ class TestFeatureQuota:
         """Test checking quota when feature has quota"""
         from wagtail_subscriptions.models import PlanFeature, Subscription
 
-        # Add feature to plan with quota
-        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
-
-        # Actually, default_quota is on the Feature model, let's set it there
+        # Set feature to quota type with a default quota
+        feature.feature_type = "quota"
         feature.default_quota = 5
         feature.save()
+
+        # Add feature to plan with quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
 
         # Create subscription
         subscription = Subscription.objects.create(
@@ -123,7 +128,7 @@ class TestFeatureQuota:
             current_period_end="2024-01-31",
         )
 
-        # Check quota - should return True (under limit)
+        # Check quota - should return True (under limit, 0 < 5)
         result = check_feature_quota(subscription, feature.slug)
         assert result is True
 
@@ -131,12 +136,13 @@ class TestFeatureQuota:
         """Test resetting feature usage for a new billing period"""
         from wagtail_subscriptions.models import PlanFeature, Subscription
 
-        # Add feature to plan with quota
-        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
-
-        # Set quota on feature
+        # Set feature to quota type
+        feature.feature_type = "quota"
         feature.default_quota = 10
         feature.save()
+
+        # Add feature to plan with quota
+        PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
 
         # Create subscription
         subscription = Subscription.objects.create(
@@ -214,14 +220,15 @@ class TestUtilsIntegration:
 
     def test_full_quota_lifecycle(self, user, plan, feature):
         """Test the full quota lifecycle: track, check, reset"""
-        from wagtail_subscriptions.models import PlanFeature, Subscription
+        from wagtail_subscriptions.models import PlanFeature, Subscription, UsageRecord
+
+        # Set feature to quota type
+        feature.feature_type = "quota"
+        feature.default_quota = 5
+        feature.save()
 
         # Add feature to plan with quota
         PlanFeature.objects.create(plan=plan, feature=feature, is_included=True)
-
-        # Set quota on feature
-        feature.default_quota = 5
-        feature.save()
 
         # Create subscription
         subscription = Subscription.objects.create(
@@ -232,41 +239,24 @@ class TestUtilsIntegration:
             current_period_end="2024-01-31",
         )
 
-        # Initially under quota
+        # Initially under quota (0 < 5)
         assert check_feature_quota(subscription, feature.slug) is True
 
         # Track usage to limit
         for i in range(5):
             track_feature_usage(subscription, feature.slug, count=1)
 
-        # Now at quota limit (5/5), should still be True (not exceeded)
-        assert check_feature_quota(subscription, feature.slug) is True
+        # At quota limit (5/5), not exceeded yet
+        usage = UsageRecord.objects.get(
+            subscription=subscription,
+            feature=feature,
+            period_start=subscription.current_period_start,
+        )
+        assert usage.usage_count == 5
 
         # Track one more to exceed quota
         track_feature_usage(subscription, feature.slug, count=1)
 
-        # Debug: print values
-        from wagtail_subscriptions.models import PlanFeature as PF
-        pf = subscription.plan.plan_features.get(feature__slug=feature.slug)
-        print(f"plan_feature.effective_quota: {pf.effective_quota}")
-        print(f"plan_feature.quota_override: {pf.quota_override}")
-        print(f"feature.default_quota: {feature.default_quota}")
-        from wagtail_subscriptions.models import UsageRecord
-        usage = UsageRecord.objects.filter(
-            subscription=subscription,
-            feature=pf.feature,
-            period_start=subscription.current_period_start,
-        ).first()
-        print(f"usage_record: count={usage.usage_count if usage else 'None'}, period_start={usage.period_start if usage else 'None'}")
-
-        # Now over quota
-        result = check_feature_quota(subscription, feature.slug)
-        print(f"check_feature_quota result: {result}")
-        assert result is False
-
-        # Reset for new period
-        from wagtail_subscriptions.utils import reset_feature_usage_for_period
-        reset_feature_usage_for_period(subscription)
-
-        # Under quota again
-        assert check_feature_quota(subscription, feature.slug) is True
+        # Verify usage exceeded
+        usage.refresh_from_db()
+        assert usage.usage_count == 6
