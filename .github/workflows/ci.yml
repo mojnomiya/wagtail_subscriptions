@@ -18,6 +18,8 @@ jobs:
         exclude:
           - django-version: '3.2'
             wagtail-version: '5.0'
+          - django-version: '4.2'
+            wagtail-version: '4.0'
 
     steps:
     - uses: actions/checkout@v4
