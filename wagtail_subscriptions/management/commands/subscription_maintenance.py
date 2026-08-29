@@ -88,15 +88,11 @@ class Command(BaseCommand):
         from ...models import Subscription
 
         count = 0
-        for subscription in Subscription.objects.filter(
-            status__in=["active", "trialing"]
-        ):
+        for subscription in Subscription.objects.filter(status__in=["active", "trialing"]):
             reset_feature_usage_for_period(subscription)
             count += 1
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Reset usage records for {count} subscriptions")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Reset usage records for {count} subscriptions"))
 
     def cleanup_expired_trials(self):
         """Clean up expired trial subscriptions"""

@@ -1,10 +1,11 @@
-import pytest
 from decimal import Decimal
+
+import pytest
 
 from wagtail_subscriptions.models import PlanFeature, SubscriptionPlan
 from wagtail_subscriptions.utils import (
-    check_feature_quota,
     calculate_proration,
+    check_feature_quota,
     get_billing_period_days,
     reset_feature_usage_for_period,
     track_feature_usage,

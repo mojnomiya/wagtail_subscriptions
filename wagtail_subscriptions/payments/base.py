@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import time
+from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 from django.conf import settings
@@ -55,9 +55,7 @@ class BasePaymentProcessor(ABC):
     ) -> Dict[str, Any]:
         """Charge a customer and return payment data"""
 
-    def _make_request_with_retry(
-        self, request_func, *args, **kwargs
-    ) -> Any:
+    def _make_request_with_retry(self, request_func, *args, **kwargs) -> Any:
         """Execute a request function with retry logic"""
         last_exception = None
         for attempt in range(self.max_retries):

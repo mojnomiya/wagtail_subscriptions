@@ -99,7 +99,9 @@ class Command(BaseCommand):
                     tenant.subscription_plan = plan
                     tenant.save()
                     updated_count += 1
-                    self.stdout.write(f"Assigned {plan.name} to {tenant.name} (matched by plan_type)")
+                    self.stdout.write(
+                        f"Assigned {plan.name} to {tenant.name} (matched by plan_type)"
+                    )
                     matched = True
                 except SubscriptionPlan.DoesNotExist:
                     pass
@@ -108,9 +110,7 @@ class Command(BaseCommand):
                 tenant.subscription_plan = default_plan
                 tenant.save()
                 updated_count += 1
-                self.stdout.write(
-                    f"Assigned {default_plan.name} to {tenant.name} (default plan)"
-                )
+                self.stdout.write(f"Assigned {default_plan.name} to {tenant.name} (default plan)")
 
         self.stdout.write(self.style.SUCCESS(f"Successfully updated {updated_count} tenants."))
 
