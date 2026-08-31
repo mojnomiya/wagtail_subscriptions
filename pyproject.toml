@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wagtail-subscriptions"
-version = "0.1.1"
+version = "0.1.2"
 description = "A comprehensive subscription management system for Wagtail CMS"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -58,10 +58,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/wagtail-subscriptions/wagtail-subscriptions"
+Homepage = "https://github.com/mojnomiya/wagtail_subscriptions"
 Documentation = "https://wagtail-subscriptions.readthedocs.io/en/latest/"
-Repository = "https://github.com/wagtail-subscriptions/wagtail-subscriptions"
-"Bug Tracker" = "https://github.com/wagtail-subscriptions/wagtail-subscriptions/issues"
+Repository = "https://github.com/mojnomiya/wagtail_subscriptions"
+"Bug Tracker" = "https://github.com/mojnomiya/wagtail_subscriptions/issues"
 
 [tool.setuptools.packages.find]
 include = ["wagtail_subscriptions*"]

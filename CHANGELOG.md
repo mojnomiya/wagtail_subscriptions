@@ -10,7 +10,14 @@ All notable changes to this project will be documented in this file.
 - Performance optimizations and caching
 - Final security audit
 
-## [1.0.0-beta] - 2024-01-XX
+## [0.1.2] - 2026-08-31
+
+### Fixed
+- Fixed all GitHub URLs pointing to wrong repository (was `wagtail-subscriptions/wagtail-subscriptions`, now `mojnomiya/wagtail_subscriptions`)
+- Fixed placeholder `yourusername` in support links
+- Added Django Packages badge to README
+
+## [0.1.1] - 2026-02-10
 
 ### Added
 - Initial release of wagtail-subscriptions

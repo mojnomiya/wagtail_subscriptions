@@ -3,6 +3,7 @@
 ![Wagtail Subscriptions Banner](wagtail_subscription.png)
 
 [![PyPI version](https://badge.fury.io/py/wagtail-subscriptions.svg)](https://badge.fury.io/py/wagtail-subscriptions)
+[![Django Packages](https://img.shields.io/badge/PyPI-wagtail--subscriptions-8c3c26.svg)](https://djangopackages.org/packages/p/wagtail_subscriptions/)
 [![Documentation Status](https://readthedocs.org/projects/wagtail-subscriptions/badge/?version=latest)](https://wagtail-subscriptions.readthedocs.io/en/latest/?badge=latest)
 [![Python Version](https://img.shields.io/pypi/pyversions/wagtail-subscriptions.svg)](https://pypi.org/project/wagtail-subscriptions/)
 [![Django Version](https://img.shields.io/badge/django-3.2%20%7C%204.2-blue.svg)](https://www.djangoproject.com/)
@@ -246,6 +247,6 @@ MIT License - see LICENSE file for details.
 ## Support
 
 - **Documentation**: https://wagtail-subscriptions.readthedocs.io/en/latest/
-- **Issues**: https://github.com/yourusername/wagtail-subscriptions/issues
-- **Discussions**: https://github.com/yourusername/wagtail-subscriptions/discussions
+- **Issues**: https://github.com/mojnomiya/wagtail_subscriptions/issues
+- **Discussions**: https://github.com/mojnomiya/wagtail_subscriptions/discussions
 - **PyPI**: https://pypi.org/project/wagtail-subscriptions/

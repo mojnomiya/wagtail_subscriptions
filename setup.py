@@ -14,13 +14,13 @@ except FileNotFoundError:
 
 setup(
     name="wagtail-subscriptions",
-    version="0.1.1",
+    version="0.1.2",
     author="Wagtail Subscriptions Team",
     author_email="contact@wagtail-subscriptions.org",
     description="A comprehensive subscription management system for Wagtail CMS",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/wagtail-subscriptions/wagtail-subscriptions",
+    url="https://github.com/mojnomiya/wagtail_subscriptions",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -52,8 +52,8 @@ setup(
     zip_safe=False,
     keywords="wagtail django subscription billing saas payment",
     project_urls={
-        "Bug Reports": "https://github.com/wagtail-subscriptions/wagtail-subscriptions/issues",
-        "Source": "https://github.com/wagtail-subscriptions/wagtail-subscriptions",
+        "Bug Reports": "https://github.com/mojnomiya/wagtail_subscriptions/issues",
+        "Source": "https://github.com/mojnomiya/wagtail_subscriptions",
         "Documentation": "https://wagtail-subscriptions.readthedocs.io/en/latest/",
     },
 )

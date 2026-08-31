@@ -135,4 +135,4 @@ def api_view(request):
 - Verify webhook endpoints
 - Check the Settings page in admin
 
-Need help? Check our [FAQ](faq.md) or [open an issue](https://github.com/yourusername/wagtail-subscriptions/issues).
+Need help? Check our [FAQ](faq.md) or [open an issue](https://github.com/mojnomiya/wagtail_subscriptions/issues).

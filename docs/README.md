@@ -24,6 +24,6 @@
 - [Recommended Steps Complete](RECOMMENDED_STEPS_COMPLETE.md) - Recent improvements
 
 ## 🔗 External Resources
-- [GitHub Repository](https://github.com/wagtail-subscriptions/wagtail-subscriptions)
-- [Issue Tracker](https://github.com/wagtail-subscriptions/wagtail-subscriptions/issues)
-- [PyPI Package](https://pypi.org/project/wagtail-subscriptions/) (coming soon)
+- [GitHub Repository](https://github.com/mojnomiya/wagtail_subscriptions)
+- [Issue Tracker](https://github.com/mojnomiya/wagtail_subscriptions/issues)
+- [PyPI Package](https://pypi.org/project/wagtail-subscriptions/)
